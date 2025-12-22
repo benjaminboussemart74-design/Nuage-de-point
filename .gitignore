@@ -13,6 +13,21 @@ Amendements/
 *.xyz
 *.e57
 *.pts
+# macOS
+.DS_Store
+
+# Dossiers de données volumineuses (nuages de points, exports)
+Amendements/
+Députés et organes.json/
+
+# Formats courants de nuages de points / gros binaires
+*.las
+*.laz
+*.pcd
+*.ply
+*.xyz
+*.e57
+*.pts
 *.bin
 
 # Node / Python common (safety)
