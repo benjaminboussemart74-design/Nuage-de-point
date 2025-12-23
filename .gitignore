@@ -20,6 +20,10 @@ Amendements/
 Amendements/
 Députés et organes.json/
 
+# Fichiers CSV et statistiques générés (peuvent être régénérés par les scripts)
+data/csv/
+data/stats/
+
 # Formats courants de nuages de points / gros binaires
 *.las
 *.laz
@@ -33,3 +37,7 @@ Députés et organes.json/
 # Node / Python common (safety)
 node_modules/
 __pycache__/
+*.pyc
+.venv/
+venv/
+env/

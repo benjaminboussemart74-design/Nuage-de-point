@@ -153,6 +153,63 @@ Lister les fichiers d'un examen d'amendements :
 ls -1 "Amendements/DLR5L15N43846/PIONANR5L17B1105/" | head
 ```
 
+## 📊 Pipeline de normalisation et d'analyse
+
+Ce dépôt inclut un système complet de normalisation des données JSON vers CSV et de calcul de statistiques parlementaires.
+
+### Étape 1 : Normalisation des données
+
+Transformez les milliers de fichiers JSON en 4 fichiers CSV cohérents :
+
+```bash
+# Installation des dépendances
+pip install -r requirements.txt
+
+# Normalisation complète (peut prendre 5-10 minutes)
+python scripts/run_normalization.py
+```
+
+**Fichiers CSV générés** (dans `data/csv/`) :
+- `acteurs.csv` : 577 députés avec informations complètes
+- `organes.csv` : 6 192 organes (groupes, commissions, délégations)
+- `mandats.csv` : 29 702 mandats (relations acteur ↔ organe)
+- `amendements.csv` : 83 949 amendements avec métadonnées
+
+### Étape 2 : Calcul des statistiques
+
+Générez des statistiques agrégées par député et par groupe politique :
+
+```bash
+python scripts/run_statistics.py
+```
+
+**Fichiers de statistiques générés** (dans `data/stats/`) :
+- `stats_par_depute.csv` : 591 députés avec métriques d'activité
+- `stats_par_groupe.csv` : 14 groupes politiques avec stats agrégées
+- `stats_par_groupe_avec_noms.csv` : Stats par groupe avec noms complets
+
+### Métriques calculées
+
+**Par député** :
+- Nombre d'amendements déposés, adoptés, rejetés, retirés, irrecevables
+- Taux d'adoption, de rejet, d'irrecevabilité
+- Moyenne de cosignataires
+- Amendements soumis à l'article 40
+
+**Par groupe politique** :
+- Nombre de députés actifs
+- Total d'amendements du groupe
+- Taux d'adoption/rejet moyens
+- Moyenne d'amendements par député
+
+### Documentation complète
+
+Consultez `scripts/README.md` pour :
+- Guide détaillé d'utilisation
+- Exemples d'utilisation pour algorithmes (ML, clustering, etc.)
+- Structure des CSV et relations
+- Personnalisation des métriques
+
 ---
 
 Si vous voulez, je peux :
