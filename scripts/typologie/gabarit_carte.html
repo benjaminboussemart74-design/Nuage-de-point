@@ -1,0 +1,568 @@
+<title>Sept territoires rennais</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;600;700&family=Playfair+Display:wght@700;900&display=swap">
+<style>
+/* Mise en page : en-tête fixe + filet rouge, colonne latérale de 300 px (types), zone principale défilante. */
+:root {
+  --bg: #FAFAF8; --bg-card: #FFFFFF; --bg-sidebar: #F2F2EE; --bg-hover: #EEEEE9;
+  --border: #DDDDD6; --border-mid: #B8B8B0; --border-dark: #2B2B2B;
+  --text: #1A1A1A; --text-secondary: #595959; --text-muted: #8A8A82;
+  --accent: #1B3F7B; --accent-hover: #15336A; --accent-light: #EEF2FA; --on-accent: #FFFFFF;
+  --red: #B01E28; --red-light: #FAF0F1; --green-leg: #1A7A4C;
+  --font-serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --font-sans: 'DM Sans', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+  /* Types de la typologie */
+  --t1: #D9668A; --t2: #8A68B8; --t3: #3F6FC4; --t4: #E3974A; --t5: #98B4D4; --t6: #C8323C; --t7: #26355F;
+  /* Listes des européennes 2024 */
+  --l-glucksmann: #ED6F8B; --l-hayer: #3366CC; --l-bardella: #0A1833; --l-aubry: #E8333A;
+  --l-toussaint: #00A86B; --l-bellamy: #1B3A6B; --l-marechal: #6B4A2E; --l-autres: #B8B8B0;
+  --carte-trait: #FFFFFF;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #15161A; --bg-card: #1D1E23; --bg-sidebar: #191A1E; --bg-hover: #26272D;
+    --border: #33343A; --border-mid: #4C4D55; --border-dark: #D8D8D2;
+    --text: #EDEDE8; --text-secondary: #B4B4AE; --text-muted: #85857F;
+    --accent: #8FB0E8; --accent-hover: #A9C3F0; --accent-light: #22304A; --on-accent: #10172A;
+    --red: #E0525B; --red-light: #3A1E21; --green-leg: #4FBF86;
+    --t1: #E07C9C; --t2: #A385CC; --t3: #5C8DE0; --t4: #EBA661; --t5: #A8C2DE; --t6: #E0525B; --t7: #6D82C2;
+    --l-bardella: #5E6F9E; --l-bellamy: #6B8EB5; --l-marechal: #A07850; --l-autres: #7A7A74;
+    --carte-trait: #1D1E23;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #15161A; --bg-card: #1D1E23; --bg-sidebar: #191A1E; --bg-hover: #26272D;
+  --border: #33343A; --border-mid: #4C4D55; --border-dark: #D8D8D2;
+  --text: #EDEDE8; --text-secondary: #B4B4AE; --text-muted: #85857F;
+  --accent: #8FB0E8; --accent-hover: #A9C3F0; --accent-light: #22304A; --on-accent: #10172A;
+  --red: #E0525B; --red-light: #3A1E21; --green-leg: #4FBF86;
+  --t1: #E07C9C; --t2: #A385CC; --t3: #5C8DE0; --t4: #EBA661; --t5: #A8C2DE; --t6: #E0525B; --t7: #6D82C2;
+  --l-bardella: #5E6F9E; --l-bellamy: #6B8EB5; --l-marechal: #A07850; --l-autres: #7A7A74;
+  --carte-trait: #1D1E23;
+  color-scheme: dark;
+}
+
+html, body { height: 100%; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: var(--font-sans); font-size: 14px; line-height: 1.6;
+}
+* { box-sizing: border-box; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.app { height: 100%; display: flex; flex-direction: column; }
+
+/* En-tête */
+.entete {
+  background: var(--bg-card); border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  height: 52px; flex-shrink: 0;
+  padding-left: max(28px, env(safe-area-inset-left, 0px));
+  padding-right: max(28px, env(safe-area-inset-right, 0px));
+}
+.entete__titre { display: flex; align-items: baseline; gap: 16px; min-width: 0; }
+.marque { font-family: var(--font-serif); font-weight: 700; font-size: 1.15rem; letter-spacing: -0.01em; white-space: nowrap; }
+.marque em { font-style: normal; color: var(--red); }
+.meta { font-size: 11px; color: var(--text-muted); letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.filet { height: 3px; background: var(--red); flex-shrink: 0; }
+
+.corps { flex: 1; min-height: 0; display: flex; }
+.laterale {
+  width: 300px; flex-shrink: 0; background: var(--bg-sidebar);
+  border-right: 1px solid var(--border); overflow-y: auto;
+  padding: 24px 20px; display: flex; flex-direction: column; gap: 20px;
+}
+.principale { flex: 1; min-width: 0; overflow-y: auto; }
+.principale__contenu {
+  max-width: 1080px; margin: 0 auto; display: flex; flex-direction: column; gap: 44px;
+  padding-block: 28px 0;
+  padding-left: max(28px, env(safe-area-inset-left, 0px));
+  padding-right: max(28px, env(safe-area-inset-right, 0px));
+}
+
+.etiquette { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); margin: 0; }
+h1 { font-family: var(--font-serif); font-weight: 900; font-size: 2.3rem; letter-spacing: -0.02em; line-height: 1.15; margin: 6px 0 0; text-wrap: balance; }
+h2 { font-family: var(--font-serif); font-weight: 700; font-size: 1.4rem; letter-spacing: -0.02em; line-height: 1.1; margin: 4px 0 0; text-wrap: balance; }
+h3 { font-family: var(--font-sans); font-weight: 600; font-size: 15px; line-height: 1.35; margin: 0; text-wrap: balance; }
+.chapeau { font-size: 15px; color: var(--text-secondary); max-width: 68ch; margin: 12px 0 0; }
+p { margin: 0; }
+.texte { color: var(--text-secondary); max-width: 68ch; }
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+/* Chiffres clés */
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); }
+.kpi { background: var(--bg-card); padding: 14px 16px; display: flex; flex-direction: column; gap: 2px; }
+.kpi__valeur { font-family: var(--font-mono); font-weight: 700; font-size: 28px; letter-spacing: -0.02em; line-height: 1.2; }
+.kpi__note { font-size: 11px; color: var(--text-muted); }
+
+/* Boutons */
+.segment { display: inline-flex; border: 1px solid var(--border-mid); border-radius: 2px; }
+.segment button {
+  background: transparent; border: 0; padding: 6px 12px; font-size: 12px; font-weight: 500;
+  color: var(--text-secondary); cursor: pointer; transition: background 0.15s, color 0.15s;
+}
+.segment button + button { border-left: 1px solid var(--border-mid); }
+.segment button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); font-weight: 600; }
+.bouton-secondaire {
+  background: transparent; border: 1px solid var(--border-mid); border-radius: 2px;
+  padding: 6px 12px; font-size: 12px; font-weight: 500; color: var(--text-secondary); cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.bouton-secondaire:hover { border-color: var(--text); color: var(--text); }
+
+/* Légende des types */
+.types { display: flex; flex-direction: column; gap: 1px; background: var(--border); border: 1px solid var(--border); }
+.type-bouton {
+  display: grid; grid-template-columns: 14px 1fr; gap: 10px; align-items: start; text-align: left;
+  background: var(--bg-card); border: 0; padding: 10px 12px; cursor: pointer; transition: background 0.15s;
+}
+.type-bouton:hover { background: var(--bg-hover); }
+.type-bouton[aria-pressed="true"] { background: var(--accent-light); }
+.pastille { width: 14px; height: 14px; display: inline-block; flex-shrink: 0; margin-top: 2px; }
+.type-bouton__nom { font-size: 13px; font-weight: 600; line-height: 1.35; display: block; }
+.type-bouton__meta { font-size: 11px; color: var(--text-muted); display: block; margin-top: 2px; }
+
+/* Carte */
+.carte-zone { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 1px; background: var(--border); border: 1px solid var(--border); }
+.carte-cadre { background: var(--bg-card); padding: 14px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.carte-outils { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+svg.carte { width: 100%; height: auto; display: block; }
+.unite { stroke: var(--carte-trait); stroke-width: 0.35; cursor: pointer; transition: opacity 0.15s; }
+.unite.attenuee { opacity: 0.14; }
+.unite.survolee { stroke: var(--text); stroke-width: 1.2; }
+.limite-commune { fill: none; stroke: var(--border-dark); stroke-width: 0.6; stroke-opacity: 0.55; pointer-events: none; }
+
+.fiche { background: var(--bg-card); padding: 16px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.fiche__titre { font-family: var(--font-serif); font-weight: 700; font-size: 1.15rem; letter-spacing: -0.01em; line-height: 1.2; }
+.fiche__type { display: flex; gap: 8px; align-items: flex-start; font-size: 12px; font-weight: 500; color: var(--text-secondary); }
+.chiffres { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border: 1px solid var(--border); }
+.chiffres div { background: var(--bg-card); padding: 8px 10px; }
+.chiffres .mono { font-weight: 600; font-size: 13px; display: block; }
+.chiffres span:not(.mono) { font-size: 11px; color: var(--text-muted); }
+
+/* Barres */
+.barres { display: flex; flex-direction: column; gap: 7px; }
+.barre { display: grid; grid-template-columns: 92px minmax(0, 1fr) 46px; gap: 8px; align-items: center; }
+.barre__nom { font-size: 12px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.barre__piste { position: relative; height: 6px; background: var(--bg-sidebar); }
+.barre__remplissage { position: absolute; inset: 0 auto 0 0; transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
+.barre__repere { position: absolute; top: -3px; bottom: -3px; width: 1.5px; background: var(--text); }
+.barre__valeur { font-family: var(--font-mono); font-weight: 600; font-size: 12px; text-align: right; font-variant-numeric: tabular-nums; }
+
+/* Nuage de points */
+.nuage-cadre { background: var(--bg-card); border: 1px solid var(--border); padding: 14px; overflow-x: auto; }
+svg.nuage { width: 100%; min-width: 520px; height: auto; display: block; }
+.nuage text { font-family: var(--font-sans); font-size: 11px; fill: var(--text-muted); }
+.nuage .axe { stroke: var(--border-mid); stroke-width: 1; stroke-dasharray: 3 3; }
+.nuage .cadre-nuage { fill: none; stroke: var(--border); }
+.point { stroke: var(--bg-card); stroke-width: 0.8; cursor: pointer; transition: opacity 0.15s; }
+.point.attenuee { opacity: 0.12; }
+.point.survolee { stroke: var(--text); stroke-width: 1.6; }
+
+/* Portraits */
+.portraits { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); }
+.portrait { background: var(--bg-card); padding: 18px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.portrait__entete { display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: start; }
+.portrait__numero { font-family: var(--font-mono); font-weight: 700; font-size: 13px; width: 28px; height: 28px; display: grid; place-items: center; color: var(--bg-card); }
+.portrait__meta { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+.portrait__texte { font-size: 13px; color: var(--text-secondary); }
+.tableau-socio { width: 100%; border-collapse: collapse; font-size: 12px; }
+.tableau-socio td { padding: 4px 0; border-top: 1px solid var(--border); }
+.tableau-socio td:nth-child(2), .tableau-socio td:nth-child(3) { text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tableau-socio td:nth-child(2) { font-weight: 600; padding-left: 8px; }
+.tableau-socio td:nth-child(3) { font-size: 11px; color: var(--text-muted); width: 72px; }
+.hausse { color: var(--green-leg); }
+.baisse { color: var(--red); }
+
+.methode { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); }
+.methode > div { background: var(--bg-card); padding: 16px; display: flex; flex-direction: column; gap: 6px; }
+.methode .mono { font-size: 12px; color: var(--accent); font-weight: 600; }
+.methode p { font-size: 13px; color: var(--text-secondary); }
+.alerte { padding: 10px 14px; background: var(--red-light); border-left: 3px solid var(--red); }
+.alerte p:first-child { font-size: 12px; font-weight: 600; color: var(--red); }
+.alerte p + p { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+
+.source {
+  background: var(--bg-sidebar); border-top: 1px solid var(--border); margin-top: 44px;
+  padding-block: 12px;
+  padding-left: max(28px, env(safe-area-inset-left, 0px));
+  padding-right: max(28px, env(safe-area-inset-right, 0px));
+}
+.source p { font-size: 11px; color: var(--text-muted); max-width: 1080px; margin: 0 auto; }
+
+/* Barre d'onglets (téléphone) */
+.onglets { display: none; }
+
+@media (max-width: 1100px) {
+  .carte-zone { grid-template-columns: minmax(0, 1fr); }
+  .methode { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 960px) {
+  .portraits { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 767px) {
+  .entete { height: 48px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .meta { display: none; }
+  .principale__contenu { padding-block: 16px 0; gap: 32px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  h1 { font-size: 1.75rem; }
+  .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .kpi__valeur { font-size: 22px; }
+  .laterale { width: 100%; border-right: 0; padding: 16px max(16px, env(safe-area-inset-right, 0px)) 16px max(16px, env(safe-area-inset-left, 0px)); overflow: visible; }
+  .corps { display: block; overflow-y: auto; padding-bottom: calc(52px + env(safe-area-inset-bottom, 0px)); }
+  .principale { overflow: visible; }
+  .source { margin-top: 32px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .onglets {
+    display: grid; grid-template-columns: repeat(3, 1fr); position: fixed; left: 0; right: 0; bottom: 0; z-index: 5;
+    background: var(--bg-card); border-top: 1px solid var(--border);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-area-inset-right, 0px);
+  }
+  .onglets button { height: 52px; background: transparent; border: 0; border-top: 2px solid transparent; font-size: 12px; font-weight: 500; color: var(--text-secondary); cursor: pointer; }
+  .onglets button[aria-selected="true"] { border-top-color: var(--accent); color: var(--text); font-weight: 600; }
+  body[data-onglet="carte"] .laterale,
+  body[data-onglet="carte"] [data-onglet-section]:not([data-onglet-section~="carte"]),
+  body[data-onglet="types"] [data-onglet-section]:not([data-onglet-section~="types"]),
+  body[data-onglet="methode"] .laterale,
+  body[data-onglet="methode"] [data-onglet-section]:not([data-onglet-section~="methode"]) { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
+</style>
+
+<div class="app">
+  <header class="entete">
+    <div class="entete__titre">
+      <span class="marque">Rennes Métropole <em>2024</em></span>
+      <span class="meta">Typologie électorale et sociale des bureaux de vote</span>
+    </div>
+  </header>
+  <div class="filet"></div>
+
+  <div class="corps">
+    <aside class="laterale" aria-label="Types de territoires">
+      <div>
+        <p class="etiquette">Typologie · 7 types</p>
+        <p class="texte" style="font-size:12px;margin-top:6px">Choisissez un type pour le faire ressortir sur la carte et dans le nuage de points.</p>
+      </div>
+      <div class="types" id="legende"></div>
+      <div><button type="button" class="bouton-secondaire" id="tout-afficher">Afficher tous les types</button></div>
+    </aside>
+
+    <main class="principale">
+      <div class="principale__contenu">
+        <section data-onglet-section="carte">
+          <p class="etiquette">Européennes et législatives 2024 · Recensement 2021 · Revenus 2019</p>
+          <h1>La métropole rennaise se partage en sept territoires électoraux</h1>
+          <p class="chapeau">Chaque bureau de vote a été classé selon deux séries de critères : ses votes de 2024 et le profil social de ses habitants. Il en ressort sept types, des grands ensembles abstentionnistes aux bourgs périurbains où le Rassemblement national arrive en tête.</p>
+        </section>
+
+        <section class="kpis" data-onglet-section="carte" aria-label="Chiffres clés">
+          <div class="kpi"><p class="etiquette">Unités analysées</p><span class="kpi__valeur" id="kpi-unites"></span><span class="kpi__note">bureaux, dont 5 communes entières</span></div>
+          <div class="kpi"><p class="etiquette">Inscrits</p><span class="kpi__valeur" id="kpi-inscrits"></span><span class="kpi__note">européennes du 9 juin 2024</span></div>
+          <div class="kpi"><p class="etiquette">Variables</p><span class="kpi__valeur">29</span><span class="kpi__note">11 électorales, 18 sociales</span></div>
+          <div class="kpi"><p class="etiquette">Écarts expliqués</p><span class="kpi__valeur">64&#8239;%</span><span class="kpi__note">des différences entre bureaux</span></div>
+        </section>
+
+        <section data-onglet-section="carte" style="display:flex;flex-direction:column;gap:14px">
+          <div>
+            <p class="etiquette">Carte · 291 unités</p>
+            <h2>Où se trouve chaque type ?</h2>
+          </div>
+          <div class="carte-zone">
+            <div class="carte-cadre">
+              <div class="carte-outils">
+                <div class="segment" role="group" aria-label="Étendue de la carte">
+                  <button type="button" id="vue-metropole" aria-pressed="true">Métropole</button>
+                  <button type="button" id="vue-rennes" aria-pressed="false">Ville de Rennes</button>
+                </div>
+                <span class="kpi__note">Traits noirs : limites communales</span>
+              </div>
+              <svg class="carte" id="carte" role="img" aria-label="Carte des bureaux de vote de Rennes Métropole colorés selon leur type"></svg>
+            </div>
+            <div class="fiche" id="fiche" aria-live="polite"></div>
+          </div>
+        </section>
+
+        <section data-onglet-section="carte" style="display:flex;flex-direction:column;gap:14px">
+          <div>
+            <p class="etiquette">Nuage de points · analyse factorielle multiple</p>
+            <h2>Deux clivages structurent la métropole</h2>
+            <p class="texte" style="margin-top:8px">Chaque point est un bureau. L'axe horizontal oppose les quartiers aisés, où l'on vote beaucoup, aux quartiers précaires et abstentionnistes. L'axe vertical oppose la ville diplômée et écologiste au périurbain où progresse le Rassemblement national. Ces deux axes résument 57&#8239;% de l'information.</p>
+          </div>
+          <div class="nuage-cadre"><svg class="nuage" id="nuage" viewBox="0 0 680 440" role="img" aria-label="Nuage de points des bureaux sur les deux premiers axes"></svg></div>
+        </section>
+
+        <section data-onglet-section="types" style="display:flex;flex-direction:column;gap:14px">
+          <div>
+            <p class="etiquette">Portraits · moyennes pondérées par les inscrits</p>
+            <h2>Qui vote quoi, et où ?</h2>
+            <p class="texte" style="margin-top:8px">Le trait noir sur chaque barre indique la moyenne de la métropole. Les écarts sont exprimés en points.</p>
+          </div>
+          <div class="portraits" id="portraits"></div>
+        </section>
+
+        <section data-onglet-section="methode" style="display:flex;flex-direction:column;gap:14px">
+          <div>
+            <p class="etiquette">Méthode</p>
+            <h2>Comment la typologie a-t-elle été construite ?</h2>
+          </div>
+          <div class="methode">
+            <div><span class="mono">Étape 1</span><h3>Des bureaux et des données</h3><p>Les résultats des européennes et du premier tour des législatives de 2024 sont rattachés aux contours des bureaux. Le profil social de chaque bureau est estimé à partir des carreaux de 200&#8239;m de l'INSEE : revenus de 2019, puis recensement de 2021 réparti selon la population de chaque carreau.</p></div>
+            <div><span class="mono">Étape 2</span><h3>Une analyse factorielle multiple</h3><p>Cette méthode résume les 29 variables en quelques axes, en donnant le même poids au vote et à la sociologie. Les huit premiers axes, qui conservent 85&#8239;% de l'information, servent à mesurer la ressemblance entre bureaux.</p></div>
+            <div><span class="mono">Étape 3</span><h3>Une classification</h3><p>Une classification ascendante hiérarchique (critère de Ward), consolidée par les k-moyennes, regroupe les bureaux qui se ressemblent le plus. Le découpage en sept types explique 64&#8239;% des écarts entre bureaux.</p></div>
+          </div>
+          <div class="alerte">
+            <p>Limites à connaître</p>
+            <p>Hors de Rennes, les contours sont une estimation d'Etalab fondée sur les adresses des électeurs. Betton, L'Hermitage, Mordelles, Pacé et Saint-Sulpice-la-Forêt, qui ont créé des bureaux depuis 2022, sont traitées comme une seule unité. Les données sociales décrivent les habitants, y compris les mineurs et les étrangers non inscrits, et non les seuls électeurs.</p>
+          </div>
+        </section>
+      </div>
+
+      <footer class="source">
+        <p>Source : ministère de l'Intérieur via data.gouv.fr (résultats 2024) ; INSEE (Filosofi 2019 carroyé, recensement 2021 par IRIS) ; IGN (contours IRIS) ; Etalab et SIG de Rennes Métropole (contours des bureaux de vote). Traitement : Nuage-de-point. Données à titre indicatif.</p>
+      </footer>
+    </main>
+  </div>
+
+  <nav class="onglets" role="tablist" aria-label="Sections">
+    <button type="button" role="tab" id="onglet-carte" data-onglet="carte" aria-selected="true">Carte</button>
+    <button type="button" role="tab" id="onglet-types" data-onglet="types" aria-selected="false">Types</button>
+    <button type="button" role="tab" id="onglet-methode" data-onglet="methode" aria-selected="false">Méthode</button>
+  </nav>
+</div>
+
+<script>
+const DONNEES = /*DONNEES*/null;
+
+const LISTES = [
+  ["glucksmann", "Glucksmann"], ["hayer", "Hayer"], ["bardella", "Bardella"], ["aubry", "Aubry"],
+  ["toussaint", "Toussaint"], ["bellamy", "Bellamy"], ["marechal", "Maréchal"], ["autres_listes", "Autres listes"],
+];
+const COULEUR_LISTE = { autres_listes: "var(--l-autres)" };
+const SOCIO = [
+  ["niveau_vie_moyen", "Niveau de vie moyen", "euros"],
+  ["menages_pauvres", "Ménages pauvres", "%"],
+  ["proprietaires", "Propriétaires", "%"],
+  ["logements_sociaux", "Logements sociaux", "%"],
+  ["cadres", "Cadres (15 ans et plus)", "%"],
+  ["ouvriers", "Ouvriers (15 ans et plus)", "%"],
+  ["diplomes_bac5", "Diplômés bac+5", "%"],
+  ["etudiants", "Étudiants (15-64 ans)", "%"],
+  ["seniors_65_plus", "65 ans et plus", "%"],
+  ["immigres", "Immigrés", "%"],
+];
+const NNBSP = " ";
+
+function nombre(v, dec = 0) {
+  return v.toLocaleString("fr-FR", { minimumFractionDigits: dec, maximumFractionDigits: dec });
+}
+function pct(v, dec = 1) { return nombre(v, dec) + NNBSP + "%"; }
+function ecart(v, ref, unite) {
+  const d = v - ref;
+  const signe = d > 0 ? "+" : d < 0 ? "−" : "";
+  const txt = unite === "euros" ? signe + nombre(Math.abs(d)) + NNBSP + "€" : signe + nombre(Math.abs(d), 1) + NNBSP + "pts";
+  return `<span class="${d > 0.05 ? "hausse" : d < -0.05 ? "baisse" : ""}">${txt}</span>`;
+}
+function couleurType(t) { return `var(--t${t})`; }
+function couleurListe(cle) { return COULEUR_LISTE[cle] || `var(--l-${cle})`; }
+const NS = "http://www.w3.org/2000/svg";
+function el(nom, attrs = {}) {
+  const e = document.createElementNS(NS, nom);
+  for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+  return e;
+}
+
+const types = DONNEES.types;
+const profils = DONNEES.profils;
+const metro = profils.metropole;
+let typeChoisi = null;
+
+/* Chiffres clés */
+document.getElementById("kpi-unites").textContent = nombre(DONNEES.unites.length);
+document.getElementById("kpi-inscrits").textContent = nombre(metro.inscrits);
+
+/* Légende */
+const legende = document.getElementById("legende");
+for (const t of types) {
+  const p = profils[t.num];
+  const b = document.createElement("button");
+  b.type = "button"; b.className = "type-bouton"; b.id = "type-" + t.num;
+  b.setAttribute("aria-pressed", "false");
+  b.innerHTML = `<span class="pastille" style="background:${couleurType(t.num)}"></span>
+    <span><span class="type-bouton__nom">${t.nom}</span>
+    <span class="type-bouton__meta">${nombre(p.nombre_unites)} unités · ${nombre(p.inscrits)} inscrits</span></span>`;
+  b.addEventListener("click", () => choisirType(typeChoisi === t.num ? null : t.num));
+  legende.appendChild(b);
+}
+document.getElementById("tout-afficher").addEventListener("click", () => choisirType(null));
+
+/* Carte */
+const carte = document.getElementById("carte");
+const vueMetropole = `0 0 ${DONNEES.largeur} ${DONNEES.hauteur}`;
+const [rx, ry, rw, rh] = DONNEES.cadreRennes;
+const marge = 12;
+const vueRennes = `${rx - marge} ${ry - marge} ${rw + 2 * marge} ${rh + 2 * marge}`;
+carte.setAttribute("viewBox", vueMetropole);
+const groupeUnites = el("g");
+const formes = new Map();
+for (const u of DONNEES.unites) {
+  const path = el("path", { d: u.d, class: "unite", fill: couleurType(u.type), "data-id": u.id });
+  path.addEventListener("mouseenter", () => survoler(u));
+  path.addEventListener("click", () => survoler(u));
+  groupeUnites.appendChild(path);
+  formes.set(u.id, path);
+}
+carte.appendChild(groupeUnites);
+const groupeCommunes = el("g");
+for (const d of DONNEES.communes) groupeCommunes.appendChild(el("path", { d, class: "limite-commune" }));
+carte.appendChild(groupeCommunes);
+
+function choisirVue(rennes) {
+  carte.setAttribute("viewBox", rennes ? vueRennes : vueMetropole);
+  document.getElementById("vue-metropole").setAttribute("aria-pressed", String(!rennes));
+  document.getElementById("vue-rennes").setAttribute("aria-pressed", String(rennes));
+  const epaisseur = rennes ? 0.2 : 0.35;
+  carte.querySelectorAll(".unite").forEach(p => p.style.strokeWidth = epaisseur);
+}
+document.getElementById("vue-metropole").addEventListener("click", () => choisirVue(false));
+document.getElementById("vue-rennes").addEventListener("click", () => choisirVue(true));
+
+/* Fiche de détail */
+const fiche = document.getElementById("fiche");
+function barres(valeurs, reference, max = 45) {
+  return `<div class="barres">${LISTES.map(([cle, nom]) => `
+    <div class="barre"><span class="barre__nom">${nom}</span>
+      <span class="barre__piste">
+        <span class="barre__remplissage" style="width:${Math.min(100, 100 * valeurs[cle] / max)}%;background:${couleurListe(cle)}"></span>
+        ${reference ? `<span class="barre__repere" style="left:${Math.min(100, 100 * reference[cle] / max)}%"></span>` : ""}
+      </span>
+      <span class="barre__valeur">${pct(valeurs[cle])}</span></div>`).join("")}</div>`;
+}
+function afficherFiche(u) {
+  if (!u) {
+    fiche.innerHTML = `<p class="etiquette">Moyenne · 43 communes</p>
+      <p class="fiche__titre">Rennes Métropole</p>
+      <p class="texte" style="font-size:12px">Survolez ou touchez un bureau pour afficher ses résultats.</p>
+      <div class="chiffres">
+        <div><span class="mono">${pct(metro.abstention_euro24)}</span><span>abstention aux européennes</span></div>
+        <div><span class="mono">${nombre(metro.niveau_vie_moyen)}${NNBSP}€</span><span>niveau de vie annuel moyen</span></div>
+      </div>
+      <p class="etiquette">Européennes 2024 · % des exprimés</p>${barres(metro, null)}`;
+    return;
+  }
+  const t = types[u.type - 1];
+  const titre = u.bureau ? `${u.commune} · bureau ${u.bureau}` : `${u.commune} · commune entière`;
+  fiche.innerHTML = `<p class="etiquette">${u.lieu ? u.lieu : "Unité d'analyse"}</p>
+    <p class="fiche__titre">${titre}</p>
+    <div class="fiche__type"><span class="pastille" style="background:${couleurType(u.type)}"></span><span>Type ${u.type} · ${t.nom}</span></div>
+    <div class="chiffres">
+      <div><span class="mono">${nombre(u.inscrits)}</span><span>inscrits</span></div>
+      <div><span class="mono">${pct(u.abstention_euro24)}</span><span>abstention</span></div>
+      <div><span class="mono">${nombre(u.niveau_vie_moyen)}${NNBSP}€</span><span>niveau de vie moyen</span></div>
+      <div><span class="mono">${pct(u.logements_sociaux)}</span><span>logements sociaux</span></div>
+    </div>
+    <p class="etiquette">Européennes 2024 · trait : moyenne métropole</p>${barres(u, metro)}`;
+}
+afficherFiche(null);
+
+let survolActuel = null;
+function survoler(u) {
+  if (survolActuel) {
+    formes.get(survolActuel)?.classList.remove("survolee");
+    points.get(survolActuel)?.classList.remove("survolee");
+  }
+  survolActuel = u.id;
+  const forme = formes.get(u.id);
+  forme.classList.add("survolee");
+  forme.parentNode.appendChild(forme);
+  const point = points.get(u.id);
+  point.classList.add("survolee");
+  point.parentNode.appendChild(point);
+  afficherFiche(u);
+}
+
+/* Nuage de points */
+const nuage = document.getElementById("nuage");
+const W = 680, H = 440, M = { g: 36, d: 20, h: 28, b: 40 };
+const xs = DONNEES.unites.map(u => u.axe_1), ys = DONNEES.unites.map(u => u.axe_2);
+const [x0, x1] = [Math.min(...xs), Math.max(...xs)], [y0, y1] = [Math.min(...ys), Math.max(...ys)];
+const sx = v => M.g + (v - x0) / (x1 - x0) * (W - M.g - M.d);
+const sy = v => H - M.b - (v - y0) / (y1 - y0) * (H - M.h - M.b);
+nuage.appendChild(el("rect", { x: M.g, y: M.h, width: W - M.g - M.d, height: H - M.h - M.b, class: "cadre-nuage" }));
+nuage.appendChild(el("line", { x1: sx(0), x2: sx(0), y1: M.h, y2: H - M.b, class: "axe" }));
+nuage.appendChild(el("line", { x1: M.g, x2: W - M.d, y1: sy(0), y2: sy(0), class: "axe" }));
+function texte(x, y, contenu, attrs = {}) {
+  const t = el("text", { x, y, ...attrs }); t.textContent = contenu; nuage.appendChild(t);
+}
+texte(M.g, H - 14, "← Aisance, forte participation");
+texte(W - M.d, H - 14, "Précarité, abstention →", { "text-anchor": "end" });
+texte(M.g + 6, M.h - 10, "↑ Ville diplômée, vote écologiste");
+texte(M.g + 6, H - M.b + 16, "↓ Périurbain, vote RN");
+const points = new Map();
+const groupePoints = el("g");
+for (const u of DONNEES.unites) {
+  const c = el("circle", { cx: sx(u.axe_1).toFixed(1), cy: sy(u.axe_2).toFixed(1), r: 4, class: "point", fill: couleurType(u.type) });
+  c.addEventListener("mouseenter", () => survoler(u));
+  c.addEventListener("click", () => survoler(u));
+  const titre = el("title"); titre.textContent = u.bureau ? `${u.commune}, bureau ${u.bureau}` : u.commune;
+  c.appendChild(titre);
+  groupePoints.appendChild(c);
+  points.set(u.id, c);
+}
+nuage.appendChild(groupePoints);
+
+/* Portraits */
+const portraits = document.getElementById("portraits");
+for (const t of types) {
+  const p = profils[t.num];
+  const premiere = LISTES.filter(([c]) => c !== "autres_listes").sort((a, b) => p[b[0]] - p[a[0]])[0];
+  const carteType = document.createElement("article");
+  carteType.className = "portrait"; carteType.id = "portrait-" + t.num;
+  carteType.innerHTML = `
+    <div class="portrait__entete">
+      <span class="portrait__numero" style="background:${couleurType(t.num)}">${t.num}</span>
+      <div><h3>${t.nom}</h3>
+      <p class="portrait__meta">${nombre(p.nombre_unites)} unités · ${nombre(p.inscrits)} inscrits · en tête : ${premiere[1]} (${pct(p[premiere[0]])})</p></div>
+    </div>
+    <p class="portrait__texte">${t.texte}</p>
+    <div class="chiffres">
+      <div><span class="mono">${pct(p.abstention_euro24)}</span><span>abstention aux européennes (${ecart(p.abstention_euro24, metro.abstention_euro24, "%")})</span></div>
+      <div><span class="mono">${pct(p.abstention_legi24)}</span><span>abstention aux législatives (${ecart(p.abstention_legi24, metro.abstention_legi24, "%")})</span></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <p class="etiquette">Européennes 2024 · % des exprimés</p>${barres(p, metro)}
+    </div>
+    <div style="display:flex;flex-direction:column;gap:4px">
+      <p class="etiquette">Sociologie · écart à la métropole</p>
+      <table class="tableau-socio"><tbody>${SOCIO.map(([cle, nom, unite]) => `
+        <tr><td>${nom}</td><td>${unite === "euros" ? nombre(p[cle]) + NNBSP + "€" : pct(p[cle])}</td><td>${ecart(p[cle], metro[cle], unite)}</td></tr>`).join("")}
+      </tbody></table>
+    </div>`;
+  portraits.appendChild(carteType);
+}
+
+/* Sélection d'un type */
+function choisirType(num) {
+  typeChoisi = num;
+  for (const t of types) document.getElementById("type-" + t.num).setAttribute("aria-pressed", String(t.num === num));
+  for (const u of DONNEES.unites) {
+    const attenue = num !== null && u.type !== num;
+    formes.get(u.id).classList.toggle("attenuee", attenue);
+    points.get(u.id).classList.toggle("attenuee", attenue);
+  }
+}
+
+/* Onglets sur téléphone */
+document.body.dataset.onglet = "carte";
+document.querySelectorAll(".onglets button").forEach(b => b.addEventListener("click", () => {
+  document.body.dataset.onglet = b.dataset.onglet;
+  document.querySelectorAll(".onglets button").forEach(o => o.setAttribute("aria-selected", String(o === b)));
+  document.querySelector(".corps").scrollTop = 0;
+}));
+</script>
