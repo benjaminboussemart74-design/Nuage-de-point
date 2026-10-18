@@ -1,0 +1,541 @@
+<title>Le poids des générations</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;600;700&family=Playfair+Display:wght@700;900&display=swap">
+<style>
+/* Mise en page : en-tête fixe et filet rouge, panneau de réglages à gauche (300 px), zone d'analyse à droite. */
+:root {
+  --bg: #FAFAF8;
+  --bg-card: #FFFFFF;
+  --bg-sidebar: #F2F2EE;
+  --bg-hover: #EEEEE9;
+  --border: #DDDDD6;
+  --border-mid: #B8B8B0;
+  --border-dark: #2B2B2B;
+  --text: #1A1A1A;
+  --text-secondary: #595959;
+  --text-muted: #85857D;
+  --accent: #1B3F7B;
+  --accent-hover: #15336A;
+  --accent-light: #EEF2FA;
+  --on-accent: #FFFFFF;
+  --red: #B01E28;
+  --green-leg: #1A7A4C;
+  --abstention: #C9C9C1;
+  --non-inscrits: #EAEAE4;
+
+  /* Couleurs des générations (palette validée pour le daltonisme) */
+  --g1: #3A63A8;
+  --g2: #B01E28;
+  --g3: #B87A12;
+  --g4: #7A55C0;
+  --g5: #1A7A4C;
+
+  --font-serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --font-sans: 'DM Sans', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #161615; --bg-card: #1E1E1C; --bg-sidebar: #232321; --bg-hover: #2C2C29;
+    --border: #3A3A36; --border-mid: #5A5A54; --border-dark: #D8D8D0;
+    --text: #EFEFEA; --text-secondary: #BDBDB5; --text-muted: #8E8E86;
+    --accent: #7FA3E0; --accent-hover: #9BB8EA; --accent-light: #22304A; --on-accent: #10141C;
+    --red: #E0525A; --green-leg: #4CB884;
+    --abstention: #4A4A45; --non-inscrits: #2A2A27;
+    --g1: #6A8FD6; --g2: #E0525A; --g3: #C08A1A; --g4: #9581D6; --g5: #1F9A5A;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #161615; --bg-card: #1E1E1C; --bg-sidebar: #232321; --bg-hover: #2C2C29;
+  --border: #3A3A36; --border-mid: #5A5A54; --border-dark: #D8D8D0;
+  --text: #EFEFEA; --text-secondary: #BDBDB5; --text-muted: #8E8E86;
+  --accent: #7FA3E0; --accent-hover: #9BB8EA; --accent-light: #22304A; --on-accent: #10141C;
+  --red: #E0525A; --green-leg: #4CB884;
+  --abstention: #4A4A45; --non-inscrits: #2A2A27;
+  --g1: #6A8FD6; --g2: #E0525A; --g3: #C08A1A; --g4: #9581D6; --g5: #1F9A5A;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--text);
+  font-family: var(--font-sans); font-size: 14px; line-height: 1.6;
+}
+.app { height: 100%; display: flex; flex-direction: column; }
+
+/* En-tête */
+header {
+  background: var(--bg-card); border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; height: 52px; flex-shrink: 0;
+  padding-left: max(28px, env(safe-area-inset-left, 0px)); padding-right: max(28px, env(safe-area-inset-right, 0px));
+}
+.marque { display: flex; align-items: baseline; gap: 16px; min-width: 0; }
+.marque strong { font-family: var(--font-serif); font-weight: 700; font-size: 1.15rem; letter-spacing: -0.01em; white-space: nowrap; }
+.marque strong span { color: var(--red); }
+.marque small { font-size: 11px; color: var(--text-muted); letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.filet { height: 3px; background: var(--red); flex-shrink: 0; }
+
+.corps { flex: 1; display: flex; min-height: 0; }
+aside {
+  width: 300px; flex-shrink: 0; overflow-y: auto; background: var(--bg-sidebar);
+  border-right: 1px solid var(--border); padding: 24px;
+  display: flex; flex-direction: column; gap: 26px;
+}
+main { flex: 1; min-width: 0; overflow-y: auto; display: flex; flex-direction: column; }
+.contenu { padding: 28px; display: flex; flex-direction: column; gap: 36px; max-width: 1100px; width: 100%; }
+
+.label {
+  font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--text-muted); margin: 0;
+}
+h1 {
+  font-family: var(--font-serif); font-weight: 900; font-size: 2.3rem; letter-spacing: -0.02em;
+  line-height: 1.15; margin: 6px 0 12px; text-wrap: balance;
+}
+h2 {
+  font-family: var(--font-serif); font-weight: 700; font-size: 1.4rem; letter-spacing: -0.02em;
+  line-height: 1.1; margin: 4px 0 6px; text-wrap: balance;
+}
+.chapo { color: var(--text-secondary); max-width: 68ch; margin: 0; font-size: 15px; }
+.note { color: var(--text-secondary); font-size: 13px; max-width: 68ch; margin: 0; }
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+/* Réglages */
+.groupe { display: flex; flex-direction: column; gap: 10px; }
+.segment { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--border-mid); border-radius: 2px; }
+.segment button {
+  font-family: var(--font-sans); font-size: 12px; font-weight: 500; padding: 8px 6px; cursor: pointer;
+  background: transparent; color: var(--text-secondary); border: 0; line-height: 1.3;
+  transition: background 0.15s, color 0.15s;
+}
+.segment button + button { border-left: 1px solid var(--border-mid); }
+.segment button:hover { background: var(--bg-hover); color: var(--text); }
+.segment button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); font-weight: 600; }
+.segment button small { display: block; font-size: 10px; font-weight: 400; opacity: 0.85; }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.curseur-tete { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.curseur-tete span { font-size: 13px; font-weight: 500; }
+.curseur-tete output { font-family: var(--font-mono); font-weight: 600; font-size: 13px; }
+input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; height: 14px; background: transparent; margin: 0; }
+input[type="range"]::-webkit-slider-runnable-track { height: 3px; background: var(--border-mid); }
+input[type="range"]::-moz-range-track { height: 3px; background: var(--border-mid); }
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; margin-top: -5.5px;
+  background: var(--accent); border: 2px solid var(--bg-card); box-shadow: 0 0 0 1px var(--accent);
+  transition: transform 0.15s;
+}
+input[type="range"]::-moz-range-thumb {
+  width: 14px; height: 14px; border-radius: 50%; background: var(--accent);
+  border: 2px solid var(--bg-card); box-shadow: 0 0 0 1px var(--accent);
+}
+input[type="range"]:hover::-webkit-slider-thumb { transform: scale(1.2); }
+.bornes { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 10px; color: var(--text-muted); }
+.btn-secondaire {
+  align-self: flex-start; font-family: var(--font-sans); font-size: 12px; font-weight: 500;
+  padding: 6px 12px; background: transparent; border: 1px solid var(--border-mid); border-radius: 2px;
+  color: var(--text-secondary); cursor: pointer; transition: border-color 0.15s, color 0.15s;
+}
+.btn-secondaire:hover { border-color: var(--text); color: var(--text); }
+.methode p { margin: 0; font-size: 12.5px; color: var(--text-secondary); line-height: 1.55; }
+.methode { display: flex; flex-direction: column; gap: 8px; }
+.formule {
+  font-family: var(--font-mono); font-size: 11.5px; background: var(--bg-card); border: 1px solid var(--border);
+  padding: 8px 10px; color: var(--text); line-height: 1.5;
+}
+
+/* Cartes des générations */
+.cartes { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); }
+.carte { background: var(--bg-card); padding: 14px 16px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.carte .nom { display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 600; }
+.pastille { width: 10px; height: 10px; flex-shrink: 0; }
+.carte .annees { font-size: 11px; color: var(--text-muted); }
+.carte .kpi { font-family: var(--font-mono); font-weight: 700; font-size: 28px; letter-spacing: -0.02em; line-height: 1.2; margin-top: 6px; font-variant-numeric: tabular-nums; }
+.carte .detail { font-size: 11px; color: var(--text-secondary); }
+.variation { font-family: var(--font-mono); font-weight: 500; font-size: 11px; }
+.hausse { color: var(--green-leg); }
+.baisse { color: var(--red); }
+.stable { color: var(--text-muted); }
+
+/* Graphique par année de naissance */
+.figure { background: var(--bg-card); border: 1px solid var(--border); padding: 18px 18px 12px; position: relative; }
+.legende { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 12px; color: var(--text-secondary); margin-bottom: 10px; }
+.legende span { display: inline-flex; align-items: center; gap: 6px; }
+.graphique { width: 100%; overflow-x: auto; }
+.graphique svg { display: block; width: 100%; min-width: 620px; height: auto; }
+.graphique text { font-family: var(--font-sans); fill: var(--text-muted); font-size: 11px; }
+.graphique .valeur-axe { font-family: var(--font-mono); font-size: 10px; }
+.graphique .nom-gen { font-size: 11px; font-weight: 600; fill: var(--text-secondary); }
+.infobulle {
+  position: absolute; pointer-events: none; background: var(--bg-card); border: 1px solid var(--border-dark);
+  padding: 8px 10px; font-size: 12px; min-width: 190px; z-index: 5;
+}
+.infobulle b { font-family: var(--font-mono); font-weight: 600; }
+.infobulle .ligne { display: flex; justify-content: space-between; gap: 14px; }
+.infobulle .titre { font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+
+/* Barres comparées */
+.comparaison { display: flex; flex-direction: column; gap: 16px; background: var(--bg-card); border: 1px solid var(--border); padding: 18px; }
+.comp-ligne { display: grid; grid-template-columns: 150px minmax(0, 1fr) 88px; gap: 4px 14px; align-items: center; }
+.comp-ligne .nom { font-size: 12px; font-weight: 500; grid-row: span 2; display: flex; align-items: center; gap: 7px; }
+.piste { height: 6px; background: var(--bg-sidebar); position: relative; }
+.piste div { position: absolute; inset: 0 auto 0 0; transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
+.piste.population div { background: var(--border-mid); }
+.comp-ligne .val { font-family: var(--font-mono); font-size: 12px; font-weight: 600; text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.comp-ligne .val.secondaire { color: var(--text-muted); font-weight: 500; }
+@media (prefers-reduced-motion: reduce) { .piste div { transition: none; } }
+
+/* Tableau */
+.tableau { overflow-x: auto; background: var(--bg-card); border: 1px solid var(--border); }
+table { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 13px; }
+th { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); text-align: right; padding: 10px 12px; border-bottom: 1px solid var(--border-dark); vertical-align: bottom; }
+th:first-child, td:first-child { text-align: left; }
+td { padding: 9px 12px; border-bottom: 1px solid var(--border); text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 12.5px; }
+td:first-child { font-family: var(--font-sans); font-weight: 500; }
+tr.total td { font-weight: 700; border-bottom: 0; }
+
+.encart { padding: 10px 14px; background: var(--accent-light); border-left: 3px solid var(--accent); }
+.encart p { margin: 0; font-size: 12.5px; color: var(--text-secondary); }
+.encart p.titre { font-weight: 600; color: var(--accent); }
+
+.source { background: var(--bg-sidebar); border-top: 1px solid var(--border); padding: 10px 28px; margin-top: auto; }
+.source p { font-size: 11px; color: var(--text-muted); margin: 0; }
+.source a { color: var(--text-muted); }
+
+/* Barre d'onglets mobile */
+.onglets { display: none; }
+@media (max-width: 767px) {
+  header { height: 48px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .marque small { display: none; }
+  aside { width: 100%; border-right: 0; padding: 16px max(16px, env(safe-area-inset-right, 0px)) 24px max(16px, env(safe-area-inset-left, 0px)); }
+  .app[data-onglet="analyse"] aside { display: none; }
+  .app[data-onglet="reglages"] main { display: none; }
+  .contenu { padding: 16px max(16px, env(safe-area-inset-right, 0px)) 24px max(16px, env(safe-area-inset-left, 0px)); gap: 28px; }
+  .source { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  h1 { font-size: 1.75rem; }
+  .cartes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cartes .carte:first-child { grid-column: span 2; }
+  .comp-ligne { grid-template-columns: minmax(0, 1fr) 78px; }
+  .comp-ligne .nom { grid-row: auto; grid-column: span 2; }
+  .onglets {
+    display: grid; grid-template-columns: 1fr 1fr; height: calc(52px + env(safe-area-inset-bottom, 0px)); flex-shrink: 0;
+    background: var(--bg-card); border-top: 1px solid var(--border); padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .onglets button {
+    background: transparent; border: 0; border-top: 2px solid transparent; font-family: var(--font-sans);
+    font-size: 12px; font-weight: 500; color: var(--text-secondary); cursor: pointer;
+  }
+  .onglets button[aria-selected="true"] { border-top-color: var(--accent); font-weight: 600; color: var(--text); }
+}
+</style>
+
+<div class="app" id="app" data-onglet="analyse">
+  <header>
+    <div class="marque">
+      <strong>Le poids des générations <span id="annee-titre">2027</span></strong>
+      <small>Présidentielle · Qui pèse dans l'urne</small>
+    </div>
+  </header>
+  <div class="filet"></div>
+
+  <div class="corps">
+    <aside id="reglages">
+      <div class="groupe">
+        <p class="label">Élection</p>
+        <div class="segment" role="group" aria-label="Élection">
+          <button type="button" id="btn-2022" data-election="2022">2022<small>observée</small></button>
+          <button type="button" id="btn-2027" data-election="2027">2027<small>projection</small></button>
+        </div>
+      </div>
+      <div class="groupe">
+        <p class="label">Tour de scrutin</p>
+        <div class="segment" role="group" aria-label="Tour de scrutin">
+          <button type="button" id="btn-t1" data-tour="t1">1er tour</button>
+          <button type="button" id="btn-t2" data-tour="t2">2d tour</button>
+        </div>
+      </div>
+      <div class="groupe">
+        <p class="label">Hypothèse · Et si…</p>
+        <div class="curseur-tete">
+          <span>Participation des moins de 35 ans</span>
+          <output id="bonus-valeur" for="bonus">±0 pt</output>
+        </div>
+        <input type="range" id="bonus" min="-15" max="20" step="1" value="0" aria-label="Variation de la participation des moins de 35 ans, en points">
+        <div class="bornes"><span>−15 pts</span><span>niveau 2022</span><span>+20 pts</span></div>
+        <button type="button" class="btn-secondaire" id="reinitialiser">Revenir au niveau de 2022</button>
+      </div>
+      <div class="methode">
+        <p class="label">Méthode</p>
+        <div class="formule">votants = population<br>× part inscrite<br>× taux de participation</div>
+        <p>Chaque année de naissance est traitée séparément. La population vient des estimations de l'INSEE au 1er janvier, la part inscrite du Répertoire électoral unique, et le taux de participation de l'enquête de l'INSEE sur la présidentielle de 2022, qui repose sur les listes d'émargement.</p>
+        <p>Pour 2027, on part de la population estimée au 1er janvier 2026 : chaque génération vieillit d'un an et évolue comme entre 2025 et 2026, sous l'effet des décès et des migrations. On suppose qu'à âge égal, on votera comme en 2022. Les jeunes qui auront 18 ans entre janvier et avril 2027 ne sont pas comptés.</p>
+        <p>Le champ couvre la France hors Français de l'étranger. Les résultats sont des ordres de grandeur, à lire au point près.</p>
+      </div>
+    </aside>
+
+    <main id="analyse">
+      <div class="contenu">
+        <section>
+          <p class="label" id="sur-titre">Projection · Présidentielle 2027 · 1er tour</p>
+          <h1 id="titre"></h1>
+          <p class="chapo" id="chapo"></p>
+        </section>
+
+        <section>
+          <p class="label">Part de chaque génération dans les votants</p>
+          <div style="height:10px"></div>
+          <div class="cartes" id="cartes"></div>
+        </section>
+
+        <section>
+          <p class="label">Année par année</p>
+          <h2>Les classes nombreuses du baby-boom votent aussi davantage</h2>
+          <p class="note" style="margin-bottom:14px">Chaque colonne représente les personnes nées une année donnée et majeures au moment du scrutin. La partie colorée correspond aux votants estimés, le gris aux inscrits qui s'abstiennent, le gris clair aux adultes qui ne sont pas inscrits (dont les étrangers non européens, qui ne peuvent pas voter).</p>
+          <div class="figure" id="figure">
+            <div class="legende">
+              <span><span class="pastille" style="background:var(--g2)"></span>Votants (couleur de la génération)</span>
+              <span><span class="pastille" style="background:var(--abstention)"></span>Inscrits abstentionnistes</span>
+              <span><span class="pastille" style="background:var(--non-inscrits);outline:1px solid var(--border-mid)"></span>Adultes non inscrits</span>
+            </div>
+            <div class="graphique" id="graphique"></div>
+            <div class="infobulle" id="infobulle" hidden></div>
+          </div>
+        </section>
+
+        <section>
+          <p class="label">Population et bulletins</p>
+          <h2>Qui est surreprésenté dans l'urne ?</h2>
+          <p class="note" style="margin-bottom:14px">La barre grise donne la part de la génération parmi les adultes qui résident en France, la barre colorée sa part parmi les votants. L'écart mesure le surpoids ou le sous-poids électoral.</p>
+          <div class="comparaison" id="comparaison"></div>
+        </section>
+
+        <section>
+          <p class="label">Détail des estimations</p>
+          <div style="height:10px"></div>
+          <div class="tableau"><table id="tableau"></table></div>
+        </section>
+
+        <div class="encart">
+          <p class="titre">Comment lire ces chiffres</p>
+          <p>Le taux de participation par âge est celui de 2022, appliqué à l'âge qu'aura chaque génération le jour du vote. Une génération ne garde donc pas son comportement d'une élection à l'autre : en vieillissant, elle prend celui de ses aînés. Le curseur permet de tester une autre mobilisation des plus jeunes.</p>
+        </div>
+      </div>
+
+      <div class="source">
+        <p>Source : INSEE via insee.fr (estimations de population au 1er janvier, Répertoire électoral unique 2022 et 2026, enquête sur la participation électorale 2022, Insee Première n° 1928 et n° 1929) · Calculs et projection 2027 : estimations à titre indicatif</p>
+      </div>
+    </main>
+  </div>
+
+  <nav class="onglets" role="tablist" aria-label="Sections">
+    <button type="button" role="tab" id="onglet-analyse" data-onglet="analyse" aria-selected="true">Analyse</button>
+    <button type="button" role="tab" id="onglet-reglages" data-onglet="reglages" aria-selected="false">Réglages et méthode</button>
+  </nav>
+</div>
+
+<script src="donnees.js"></script>
+<script>
+// Les cinq générations, définies par leurs années de naissance.
+const GENERATIONS = [
+  { id: 'g1', nom: 'Nés avant 1946', sujet: 'les personnes nées avant 1946', annees: 'jusqu’à 1945', debut: 1900, fin: 1945 },
+  { id: 'g2', nom: 'Baby-boomers', sujet: 'les baby-boomers', annees: '1946-1964', debut: 1946, fin: 1964 },
+  { id: 'g3', nom: 'Génération X', sujet: 'la génération X', annees: '1965-1980', debut: 1965, fin: 1980 },
+  { id: 'g4', nom: 'Génération Y', sujet: 'la génération Y', annees: '1981-1996', debut: 1981, fin: 1996 },
+  { id: 'g5', nom: 'Génération Z', sujet: 'la génération Z', annees: '1997 et après', debut: 1997, fin: 2012 },
+];
+
+const etat = { election: '2027', tour: 't1', bonus: 0 };
+
+// Formats français : virgule décimale et espace insécable avant « % ».
+const NBSP = ' ';
+const pct = (x, d = 1) => (x * 100).toLocaleString('fr-FR', { minimumFractionDigits: d, maximumFractionDigits: d }) + NBSP + '%';
+const pts = x => {
+  const v = Math.round(x * 1000) / 10;
+  const signe = v > 0 ? '+' : v < 0 ? '−' : '±';
+  return signe + Math.abs(v).toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + NBSP + 'pt' + (Math.abs(v) >= 2 ? 's' : '');
+};
+const millions = x => (x / 1e6).toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + NBSP + 'million' + (x >= 2e6 ? 's' : '');
+const entier = x => Math.round(x).toLocaleString('fr-FR').replace(/ /g, NBSP);
+const generationDe = naissance => GENERATIONS.find(g => naissance >= g.debut && naissance <= g.fin);
+
+// Calcule, pour une élection et un tour, les votants de chaque année de naissance.
+function calculer(election, tour, bonus) {
+  const annees = window.DONNEES[election].map(d => {
+    const taux = Math.min(1, Math.max(0, d[tour] + (d.age < 35 ? bonus / 100 : 0)));
+    const inscrits = d.population * d.inscription;
+    return { ...d, inscrits, votants: inscrits * taux, taux, generation: generationDe(d.naissance) };
+  });
+  const total = { population: 0, inscrits: 0, votants: 0 };
+  annees.forEach(a => { total.population += a.population; total.inscrits += a.inscrits; total.votants += a.votants; });
+  const generations = GENERATIONS.map(g => {
+    const membres = annees.filter(a => a.generation === g);
+    const somme = cle => membres.reduce((s, a) => s + a[cle], 0);
+    const population = somme('population'), inscrits = somme('inscrits'), votants = somme('votants');
+    const ages = membres.map(a => a.age);
+    return {
+      ...g, population, inscrits, votants,
+      agesMin: Math.min(...ages), agesMax: Math.max(...ages),
+      partPopulation: population / total.population,
+      partVotants: votants / total.votants,
+      participation: votants / inscrits,
+    };
+  });
+  return { annees, generations, total };
+}
+
+function rendre() {
+  const r = calculer(etat.election, etat.tour, etat.bonus);
+  const autre = etat.election === '2027' ? '2022' : '2027';
+  const rAutre = calculer(autre, etat.tour, etat.bonus);
+  const tourTexte = etat.tour === 't1' ? '1er tour' : '2d tour';
+
+  document.getElementById('annee-titre').textContent = etat.election;
+  document.getElementById('sur-titre').textContent =
+    (etat.election === '2027' ? 'Projection' : 'Estimation') + ' · Présidentielle ' + etat.election + ' · ' + tourTexte +
+    (etat.bonus ? ' · Hypothèse ' + (etat.bonus > 0 ? '+' : '−') + Math.abs(etat.bonus) + NBSP + 'pts chez les moins de 35 ans' : '');
+
+  // Titre : la génération la plus lourde dans l'urne.
+  const tri = [...r.generations].sort((a, b) => b.partVotants - a.partVotants);
+  const premiere = tri[0];
+  const pluriel = premiere.sujet.startsWith('les ');
+  const verbe = etat.election === '2027' ? (pluriel ? 'pèseraient' : 'pèserait') : (pluriel ? 'ont pesé' : 'a pesé');
+  document.getElementById('titre').textContent =
+    'En ' + etat.election + ', ' + premiere.sujet + ' ' + verbe + ' ' + pct(premiere.partVotants, 0) + ' des votants';
+  const boomers = r.generations[1], y = r.generations[3], z = r.generations[4];
+  document.getElementById('chapo').textContent =
+    'Sur environ ' + millions(r.total.votants) + ' de votants estimés au ' + tourTexte + ', les baby-boomers, âgés de ' + boomers.agesMin + ' à ' + boomers.agesMax +
+    ' ans, représentent ' + pct(boomers.partPopulation) + ' des adultes mais ' + pct(boomers.partVotants) + ' des bulletins. La génération Y, presque aussi nombreuse (' +
+    pct(y.partPopulation) + ' des adultes), ne fournit que ' + pct(y.partVotants) + ' des votants, et la génération Z ' + pct(z.partVotants) + '.';
+
+  // Cartes
+  document.getElementById('cartes').innerHTML = r.generations.map((g, i) => {
+    // Variation présentée dans le sens chronologique : de 2022 vers 2027.
+    const ecart = etat.election === '2027' ? g.partVotants - rAutre.generations[i].partVotants : rAutre.generations[i].partVotants - g.partVotants;
+    const classe = Math.abs(ecart) < 0.0005 ? 'stable' : ecart > 0 ? 'hausse' : 'baisse';
+    const fleche = classe === 'stable' ? '' : ecart > 0 ? '▲ ' : '▼ ';
+    return '<div class="carte">' +
+      '<span class="nom"><span class="pastille" style="background:var(--' + g.id + ')"></span>' + g.nom + '</span>' +
+      '<span class="annees">Nés ' + (g.debut === 1900 ? 'avant 1946' : g.annees.replace('-', ' à ')) + ' · ' + g.agesMin + '-' + g.agesMax + NBSP + 'ans</span>' +
+      '<span class="kpi">' + pct(g.partVotants) + '</span>' +
+      '<span class="variation ' + classe + '">' + fleche + pts(ecart) + (etat.election === '2027' ? ' depuis 2022' : ' en 2027') + '</span>' +
+      '<span class="detail">' + pct(g.partPopulation) + ' des adultes</span>' +
+      '</div>';
+  }).join('');
+
+  rendreGraphique(r);
+
+  // Comparaison population / votants
+  const max = Math.max(...r.generations.map(g => Math.max(g.partPopulation, g.partVotants)));
+  document.getElementById('comparaison').innerHTML = r.generations.map(g => {
+    const ecart = g.partVotants - g.partPopulation;
+    return '<div class="comp-ligne">' +
+      '<span class="nom"><span class="pastille" style="background:var(--' + g.id + ')"></span>' + g.nom + '</span>' +
+      '<div class="piste population" title="Part des adultes"><div style="width:' + (g.partPopulation / max * 100) + '%"></div></div>' +
+      '<span class="val secondaire">' + pct(g.partPopulation) + '</span>' +
+      '<div class="piste" title="Part des votants"><div style="width:' + (g.partVotants / max * 100) + '%;background:var(--' + g.id + ')"></div></div>' +
+      '<span class="val">' + pct(g.partVotants) + ' <span class="variation ' + (ecart >= 0 ? 'hausse' : 'baisse') + '">' + pts(ecart) + '</span></span>' +
+      '</div>';
+  }).join('');
+
+  // Tableau
+  const t = r.total;
+  document.getElementById('tableau').innerHTML =
+    '<thead><tr><th>Génération</th><th>Âge au scrutin</th><th>Adultes</th><th>Inscrits</th><th>Participation</th><th>Votants</th><th>Part des adultes</th><th>Part des votants</th></tr></thead><tbody>' +
+    r.generations.map(g => '<tr><td>' + g.nom + '</td><td>' + g.agesMin + '-' + g.agesMax + '</td><td>' + entier(g.population) + '</td><td>' + entier(g.inscrits) +
+      '</td><td>' + pct(g.participation) + '</td><td>' + entier(g.votants) + '</td><td>' + pct(g.partPopulation) + '</td><td>' + pct(g.partVotants) + '</td></tr>').join('') +
+    '<tr class="total"><td>Ensemble</td><td>18 ans et plus</td><td>' + entier(t.population) + '</td><td>' + entier(t.inscrits) + '</td><td>' + pct(t.votants / t.inscrits) +
+    '</td><td>' + entier(t.votants) + '</td><td>100,0' + NBSP + '%</td><td>100,0' + NBSP + '%</td></tr></tbody>';
+
+  document.querySelectorAll('[data-election]').forEach(b => b.setAttribute('aria-pressed', b.dataset.election === etat.election));
+  document.querySelectorAll('[data-tour]').forEach(b => b.setAttribute('aria-pressed', b.dataset.tour === etat.tour));
+  document.getElementById('bonus-valeur').textContent = etat.bonus === 0 ? '±0' + NBSP + 'pt' : (etat.bonus > 0 ? '+' : '−') + Math.abs(etat.bonus) + NBSP + 'pts';
+}
+
+// Graphique en colonnes empilées : une colonne par année de naissance.
+const DEBUT = 1920, FIN = 2008;
+const L = 900, H = 340, M = { haut: 30, droite: 10, bas: 34, gauche: 46 };
+const YMAX = 1000000;
+
+function rendreGraphique(r) {
+  const largeur = (L - M.gauche - M.droite) / (FIN - DEBUT + 1);
+  const x = annee => M.gauche + (annee - DEBUT) * largeur;
+  const y = v => M.haut + (H - M.haut - M.bas) * (1 - v / YMAX);
+  let svg = '<svg viewBox="0 0 ' + L + ' ' + H + '" role="img" aria-label="Population, inscrits et votants par année de naissance">';
+
+  // Grille horizontale
+  for (let v = 0; v <= YMAX; v += 200000) {
+    svg += '<line x1="' + M.gauche + '" x2="' + (L - M.droite) + '" y1="' + y(v) + '" y2="' + y(v) + '" stroke="var(--border)" stroke-width="1"/>';
+    svg += '<text class="valeur-axe" x="' + (M.gauche - 6) + '" y="' + (y(v) + 3) + '" text-anchor="end">' + (v === 0 ? '0' : (v / 1000) + NBSP + 'k') + '</text>';
+  }
+  // Bandes et noms des générations
+  GENERATIONS.forEach(g => {
+    const d = Math.max(g.debut, DEBUT), f = Math.min(g.fin, FIN);
+    if (g.debut > DEBUT) svg += '<line x1="' + x(g.debut) + '" x2="' + x(g.debut) + '" y1="' + (M.haut - 18) + '" y2="' + y(0) + '" stroke="var(--border-mid)" stroke-dasharray="2 3"/>';
+    svg += '<text class="nom-gen" x="' + ((x(d) + x(f + 1)) / 2) + '" y="' + (M.haut - 8) + '" text-anchor="middle">' + g.nom.replace('Génération ', 'Gén. ') + '</text>';
+  });
+  // Colonnes
+  r.annees.forEach(a => {
+    if (a.naissance < DEBUT) return;
+    const x0 = x(a.naissance) + 1, w = Math.max(1, largeur - 2);
+    const pile = [[a.votants, 'var(--' + a.generation.id + ')'], [a.inscrits - a.votants, 'var(--abstention)'], [a.population - a.inscrits, 'var(--non-inscrits)']];
+    let cumul = 0;
+    pile.forEach(([v, couleur]) => {
+      const haut = y(cumul + v), bas = y(cumul);
+      svg += '<rect x="' + x0 + '" y="' + haut + '" width="' + w + '" height="' + Math.max(0, bas - haut) + '" fill="' + couleur + '"/>';
+      cumul += v;
+    });
+    svg += '<rect class="zone" data-annee="' + a.naissance + '" x="' + x(a.naissance) + '" y="' + M.haut + '" width="' + largeur + '" height="' + (H - M.haut - M.bas) + '" fill="transparent"/>';
+  });
+  // Axe des années
+  svg += '<line x1="' + M.gauche + '" x2="' + (L - M.droite) + '" y1="' + y(0) + '" y2="' + y(0) + '" stroke="var(--border-dark)"/>';
+  for (let annee = DEBUT; annee <= FIN; annee += 10) {
+    svg += '<text class="valeur-axe" x="' + (x(annee) + largeur / 2) + '" y="' + (H - M.bas + 16) + '" text-anchor="middle">' + annee + '</text>';
+  }
+  svg += '<text x="' + (L - M.droite) + '" y="' + (H - 4) + '" text-anchor="end">année de naissance</text>';
+  svg += '</svg>';
+  document.getElementById('graphique').innerHTML = svg;
+
+  const bulle = document.getElementById('infobulle');
+  const figure = document.getElementById('figure');
+  const parAnnee = Object.fromEntries(r.annees.map(a => [a.naissance, a]));
+  document.querySelectorAll('#graphique .zone').forEach(zone => {
+    const montrer = ev => {
+      const a = parAnnee[zone.dataset.annee];
+      bulle.innerHTML =
+        '<div class="titre"><span class="pastille" style="background:var(--' + a.generation.id + ')"></span>Nés en ' + a.naissance + ' · ' + a.age + NBSP + 'ans</div>' +
+        '<div class="ligne"><span>Adultes</span><b>' + entier(a.population) + '</b></div>' +
+        '<div class="ligne"><span>Inscrits</span><b>' + entier(a.inscrits) + '</b></div>' +
+        '<div class="ligne"><span>Votants estimés</span><b>' + entier(a.votants) + '</b></div>' +
+        '<div class="ligne"><span>Participation</span><b>' + pct(a.taux) + '</b></div>' +
+        '<div class="ligne"><span>Part des votants</span><b>' + pct(a.votants / r.total.votants, 2) + '</b></div>';
+      bulle.hidden = false;
+      const cadre = figure.getBoundingClientRect(), z = zone.getBoundingClientRect();
+      let gauche = z.left - cadre.left + z.width + 10;
+      if (gauche + bulle.offsetWidth > cadre.width - 8) gauche = z.left - cadre.left - bulle.offsetWidth - 10;
+      bulle.style.left = Math.max(8, gauche) + 'px';
+      bulle.style.top = '64px';
+      zone.setAttribute('fill', 'var(--text)'); zone.setAttribute('fill-opacity', '0.06');
+    };
+    const cacher = () => { bulle.hidden = true; zone.setAttribute('fill', 'transparent'); };
+    zone.addEventListener('mouseenter', montrer);
+    zone.addEventListener('mouseleave', cacher);
+    zone.addEventListener('touchstart', montrer, { passive: true });
+  });
+}
+
+// Interactions
+document.querySelectorAll('[data-election]').forEach(b => b.addEventListener('click', () => { etat.election = b.dataset.election; rendre(); }));
+document.querySelectorAll('[data-tour]').forEach(b => b.addEventListener('click', () => { etat.tour = b.dataset.tour; rendre(); }));
+const curseur = document.getElementById('bonus');
+curseur.addEventListener('input', () => { etat.bonus = Number(curseur.value); rendre(); });
+document.getElementById('reinitialiser').addEventListener('click', () => { curseur.value = 0; etat.bonus = 0; rendre(); });
+document.querySelectorAll('.onglets button').forEach(b => b.addEventListener('click', () => {
+  document.getElementById('app').dataset.onglet = b.dataset.onglet;
+  document.querySelectorAll('.onglets button').forEach(o => o.setAttribute('aria-selected', o === b));
+}));
+
+rendre();
+</script>
