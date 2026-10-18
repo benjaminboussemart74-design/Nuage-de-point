@@ -1,9 +1,10 @@
 <title>Le poids des générations</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;600;700&family=Playfair+Display:wght@700;900&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@500;600;700&family=Playfair+Display:ital,wght@0,700;0,900;1,700&display=swap">
 <style>
-/* Mise en page : en-tête fixe et filet rouge, panneau de réglages à gauche (300 px), zone d'analyse à droite. */
+/* Mise en page : une seule colonne éditoriale de 1180 px. Le simulateur occupe le centre :
+   résultats à gauche (7/12), table de réglage par âge à droite (5/12). Le reste suit, en retrait. */
 :root {
   --bg: #FAFAF8;
   --bg-card: #FFFFFF;
@@ -20,479 +21,390 @@
   --accent-light: #EEF2FA;
   --on-accent: #FFFFFF;
   --red: #B01E28;
+  --red-light: #FAF0F1;
   --green-leg: #1A7A4C;
   --abstention: #C9C9C1;
   --non-inscrits: #EAEAE4;
 
-  /* Couleurs des générations (palette validée pour le daltonisme) */
-  --g1: #3A63A8;
-  --g2: #B01E28;
-  --g3: #B87A12;
-  --g4: #7A55C0;
-  --g5: #1A7A4C;
+  /* Générations (palette validée pour le daltonisme) */
+  --g1: #3A63A8; --g2: #B01E28; --g3: #B87A12; --g4: #7A55C0; --g5: #1A7A4C;
+
+  /* Couleurs partisanes : réservées aux résultats */
+  --c-extreme-gauche: #8E1B1B; --c-lfi: #E8333A; --c-pcf: #B5121B; --c-ecolo: #00A86B; --c-ps: #ED6F8B;
+  --c-renaissance: #3366CC; --c-lr: #1B3A6B; --c-resistons: #B08A4A; --c-dlf: #4E6E9E; --c-rn: #0A1833;
+  --c-reconquete: #6B3A1F; --c-autres: #9A9A92;
 
   --font-serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
   --font-sans: 'DM Sans', system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+  --largeur: 1180px;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #161615; --bg-card: #1E1E1C; --bg-sidebar: #232321; --bg-hover: #2C2C29;
-    --border: #3A3A36; --border-mid: #5A5A54; --border-dark: #D8D8D0;
+    --bg: #151514; --bg-card: #1D1D1B; --bg-sidebar: #222220; --bg-hover: #2B2B28;
+    --border: #363632; --border-mid: #56564F; --border-dark: #D8D8D0;
     --text: #EFEFEA; --text-secondary: #BDBDB5; --text-muted: #8E8E86;
-    --accent: #7FA3E0; --accent-hover: #9BB8EA; --accent-light: #22304A; --on-accent: #10141C;
-    --red: #E0525A; --green-leg: #4CB884;
+    --accent: #7FA3E0; --accent-hover: #9BB8EA; --accent-light: #1F2B42; --on-accent: #10141C;
+    --red: #E0525A; --red-light: #2E1C1D; --green-leg: #4CB884;
     --abstention: #4A4A45; --non-inscrits: #2A2A27;
     --g1: #6A8FD6; --g2: #E0525A; --g3: #C08A1A; --g4: #9581D6; --g5: #1F9A5A;
+    --c-lr: #5F7FBF; --c-rn: #8C9CC8; --c-reconquete: #B07A55; --c-extreme-gauche: #C24A4A; --c-dlf: #7C98C4;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #161615; --bg-card: #1E1E1C; --bg-sidebar: #232321; --bg-hover: #2C2C29;
-  --border: #3A3A36; --border-mid: #5A5A54; --border-dark: #D8D8D0;
+  --bg: #151514; --bg-card: #1D1D1B; --bg-sidebar: #222220; --bg-hover: #2B2B28;
+  --border: #363632; --border-mid: #56564F; --border-dark: #D8D8D0;
   --text: #EFEFEA; --text-secondary: #BDBDB5; --text-muted: #8E8E86;
-  --accent: #7FA3E0; --accent-hover: #9BB8EA; --accent-light: #22304A; --on-accent: #10141C;
-  --red: #E0525A; --green-leg: #4CB884;
+  --accent: #7FA3E0; --accent-hover: #9BB8EA; --accent-light: #1F2B42; --on-accent: #10141C;
+  --red: #E0525A; --red-light: #2E1C1D; --green-leg: #4CB884;
   --abstention: #4A4A45; --non-inscrits: #2A2A27;
   --g1: #6A8FD6; --g2: #E0525A; --g3: #C08A1A; --g4: #9581D6; --g5: #1F9A5A;
+  --c-lr: #5F7FBF; --c-rn: #8C9CC8; --c-reconquete: #B07A55; --c-extreme-gauche: #C24A4A; --c-dlf: #7C98C4;
   color-scheme: dark;
 }
 
 * { box-sizing: border-box; }
-html, body { height: 100%; }
+[hidden] { display: none !important; }
 body {
   margin: 0; background: var(--bg); color: var(--text);
   font-family: var(--font-sans); font-size: 14px; line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
 }
-.app { height: 100%; display: flex; flex-direction: column; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg-card); }
+.cadre { max-width: var(--largeur); margin: 0 auto; padding-left: max(28px, env(safe-area-inset-left, 0px)); padding-right: max(28px, env(safe-area-inset-right, 0px)); }
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 /* En-tête */
-header {
-  background: var(--bg-card); border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; height: 52px; flex-shrink: 0;
-  padding-left: max(28px, env(safe-area-inset-left, 0px)); padding-right: max(28px, env(safe-area-inset-right, 0px));
-}
+.entete { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 9; background: var(--bg-card); }
+.entete .barre { height: 52px; display: flex; align-items: center; justify-content: space-between; gap: 16px; border-bottom: 1px solid var(--border); }
 .marque { display: flex; align-items: baseline; gap: 16px; min-width: 0; }
 .marque strong { font-family: var(--font-serif); font-weight: 700; font-size: 1.15rem; letter-spacing: -0.01em; white-space: nowrap; }
 .marque strong span { color: var(--red); }
-.marque small { font-size: 11px; color: var(--text-muted); letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.filet { height: 3px; background: var(--red); flex-shrink: 0; }
+.marque small, .entete nav a { font-size: 11px; color: var(--text-muted); letter-spacing: 0.06em; text-transform: uppercase; }
+.entete nav { display: flex; gap: 20px; }
+.entete nav a { text-decoration: none; transition: color 0.15s; }
+.entete nav a:hover { color: var(--text); }
+.filet { height: 3px; background: var(--red); }
 
-.corps { flex: 1; display: flex; min-height: 0; }
-aside {
-  width: 300px; flex-shrink: 0; overflow-y: auto; background: var(--bg-sidebar);
-  border-right: 1px solid var(--border); padding: 24px;
-  display: flex; flex-direction: column; gap: 26px;
-}
-main { flex: 1; min-width: 0; overflow-y: auto; display: flex; flex-direction: column; }
-.contenu { padding: 28px; display: flex; flex-direction: column; gap: 36px; max-width: 1100px; width: 100%; }
+.label { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); margin: 0; }
+h1, h2, h3 { font-family: var(--font-serif); letter-spacing: -0.02em; text-wrap: balance; margin: 0; }
+h1 { font-weight: 900; font-size: clamp(2.1rem, 4.6vw, 3.4rem); line-height: 1.04; }
+h1 em { font-style: italic; font-weight: 700; color: var(--red); }
+h2 { font-weight: 700; font-size: clamp(1.35rem, 2.4vw, 1.75rem); line-height: 1.12; }
+h3 { font-weight: 700; font-size: 1.15rem; line-height: 1.2; }
+.chapo { font-size: 16px; line-height: 1.6; color: var(--text-secondary); max-width: 62ch; margin: 0; }
+.note { font-size: 13px; color: var(--text-secondary); max-width: 68ch; margin: 0; }
 
-.label {
-  font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase;
-  color: var(--text-muted); margin: 0;
-}
-h1 {
-  font-family: var(--font-serif); font-weight: 900; font-size: 2.3rem; letter-spacing: -0.02em;
-  line-height: 1.15; margin: 6px 0 12px; text-wrap: balance;
-}
-h2 {
-  font-family: var(--font-serif); font-weight: 700; font-size: 1.4rem; letter-spacing: -0.02em;
-  line-height: 1.1; margin: 4px 0 6px; text-wrap: balance;
-}
-.chapo { color: var(--text-secondary); max-width: 68ch; margin: 0; font-size: 15px; }
-.note { color: var(--text-secondary); font-size: 13px; max-width: 68ch; margin: 0; }
-.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+/* Ouverture */
+.ouverture { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 48px; align-items: end; padding-block: 48px 36px; }
+.ouverture .texte { display: flex; flex-direction: column; gap: 16px; }
+.chiffres-cles { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--border-dark); }
+.chiffres-cles div { padding: 14px 0 0; display: flex; flex-direction: column; gap: 2px; }
+.chiffres-cles div + div { padding-left: 20px; border-left: 1px solid var(--border); }
+.chiffres-cles div:first-child { padding-right: 20px; }
+.chiffres-cles b { font-family: var(--font-mono); font-weight: 700; font-size: 34px; letter-spacing: -0.03em; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.chiffres-cles span { font-size: 12px; color: var(--text-secondary); line-height: 1.45; }
 
-/* Réglages */
-.groupe { display: flex; flex-direction: column; gap: 10px; }
-.segment { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--border-mid); border-radius: 2px; }
-.segment button {
-  font-family: var(--font-sans); font-size: 12px; font-weight: 500; padding: 8px 6px; cursor: pointer;
-  background: transparent; color: var(--text-secondary); border: 0; line-height: 1.3;
-  transition: background 0.15s, color 0.15s;
+/* Barre de commande du simulateur */
+.commande { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px 24px; padding-block: 14px; border-top: 1px solid var(--border-dark); border-bottom: 1px solid var(--border); }
+.bascule { display: inline-grid; grid-auto-flow: column; border: 1px solid var(--border-dark); border-radius: 2px; }
+.bascule button {
+  font-family: var(--font-sans); font-size: 12px; font-weight: 500; padding: 7px 14px; cursor: pointer; line-height: 1.25;
+  background: transparent; color: var(--text-secondary); border: 0; transition: background 0.15s, color 0.15s;
 }
-.segment button + button { border-left: 1px solid var(--border-mid); }
-.segment button:hover { background: var(--bg-hover); color: var(--text); }
-.segment button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); font-weight: 600; }
-.segment button small { display: block; font-size: 10px; font-weight: 400; opacity: 0.85; }
-button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.bascule button + button { border-left: 1px solid var(--border-dark); }
+.bascule button:hover { background: var(--bg-hover); color: var(--text); }
+.bascule button[aria-pressed="true"] { background: var(--text); color: var(--bg); font-weight: 600; }
+.bascule.petite button { padding: 5px 10px; font-size: 11.5px; }
+.puces { display: flex; flex-wrap: wrap; gap: 6px; }
+.puces button {
+  font-family: var(--font-sans); font-size: 12px; font-weight: 500; padding: 5px 11px; cursor: pointer;
+  border: 1px solid var(--border-mid); border-radius: 2px; background: var(--bg-card); color: var(--text-secondary);
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+.puces button:hover { border-color: var(--text); color: var(--text); }
+.puces button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 600; }
 
-.curseur-tete { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
-.curseur-tete span { font-size: 13px; font-weight: 500; }
-.curseur-tete output { font-family: var(--font-mono); font-weight: 600; font-size: 13px; }
-input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; height: 14px; background: transparent; margin: 0; }
+/* Simulateur */
+.simulateur { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); border-bottom: 1px solid var(--border); }
+.resultats { padding: 28px 40px 32px 0; display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+.reglages { padding: 28px 0 32px 32px; border-left: 1px solid var(--border); display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.verdict { display: flex; flex-direction: column; gap: 8px; }
+.verdict p { margin: 0; font-size: 14px; color: var(--text-secondary); max-width: 60ch; }
+
+.tete { display: grid; gap: 1px; background: var(--border); border: 1px solid var(--border); }
+.tete.deux { grid-template-columns: 1fr 1fr; }
+.tete.trois { grid-template-columns: 1fr 1fr 1fr; }
+.tete .place { background: var(--bg-card); padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 2px; border-top: 3px solid var(--couleur); min-width: 0; }
+.place .rang { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); }
+.place .nom { font-weight: 600; font-size: 14px; line-height: 1.3; }
+.place .parti { font-size: 11px; color: var(--text-muted); }
+.place .score { font-family: var(--font-mono); font-weight: 700; font-size: 34px; letter-spacing: -0.03em; line-height: 1.15; margin-top: 8px; font-variant-numeric: tabular-nums; }
+.place .delta { font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary); }
+
+.liste { display: flex; flex-direction: column; }
+.ligne-res { display: grid; grid-template-columns: 178px minmax(0, 1fr) 62px 64px; gap: 12px; align-items: center; padding: 7px 0; border-bottom: 1px solid var(--border); }
+.ligne-res:last-child { border-bottom: 0; }
+.ligne-res .qui { font-size: 12.5px; font-weight: 500; line-height: 1.25; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ligne-res .qui small { color: var(--text-muted); font-weight: 400; font-size: 11px; }
+.piste { height: 6px; background: var(--bg-sidebar); position: relative; }
+.piste .rempli { position: absolute; inset: 0 auto 0 0; transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
+.piste .officiel { position: absolute; top: -4px; bottom: -4px; width: 2px; margin-left: -1px; background: var(--text); transition: left 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
+.ligne-res .val { font-family: var(--font-mono); font-weight: 600; font-size: 12.5px; text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ligne-res .ecart { font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary); text-align: right; white-space: nowrap; }
+.ecart.nul { color: var(--text-muted); }
+.legende { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 11.5px; color: var(--text-muted); }
+.legende span { display: inline-flex; align-items: center; gap: 6px; }
+.trait { width: 2px; height: 12px; background: var(--text); display: inline-block; }
+.pastille { width: 10px; height: 10px; flex-shrink: 0; display: inline-block; }
+
+/* Table de réglage par âge */
+.reglages .entete-reglages { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.btn-lien { font-family: var(--font-sans); font-size: 12px; font-weight: 500; color: var(--accent); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.btn-lien:hover { color: var(--accent-hover); }
+.age { display: grid; grid-template-columns: 82px minmax(0, 1fr) 46px; gap: 4px 12px; align-items: center; padding: 10px 0; border-top: 1px solid var(--border); }
+.age:first-of-type { border-top: 1px solid var(--border-dark); }
+.age .tranche { font-weight: 600; font-size: 12.5px; line-height: 1.2; }
+.age output { font-family: var(--font-mono); font-weight: 600; font-size: 13px; text-align: right; }
+.age .sous { grid-column: 2 / 4; display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 11px; color: var(--text-muted); }
+.age select {
+  font-family: var(--font-sans); font-size: 11.5px; color: var(--text); background: var(--bg-card);
+  border: 1px solid var(--border-mid); border-radius: 2px; padding: 2px 4px; max-width: 200px; cursor: pointer;
+}
+.age.modifiee .tranche { color: var(--accent); }
+.curseur { position: relative; height: 14px; }
+.curseur .repere { position: absolute; top: 1px; width: 1px; height: 12px; background: var(--text-muted); pointer-events: none; }
+input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; height: 14px; background: transparent; margin: 0; position: relative; display: block; cursor: pointer; }
 input[type="range"]::-webkit-slider-runnable-track { height: 3px; background: var(--border-mid); }
 input[type="range"]::-moz-range-track { height: 3px; background: var(--border-mid); }
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; margin-top: -5.5px;
-  background: var(--accent); border: 2px solid var(--bg-card); box-shadow: 0 0 0 1px var(--accent);
-  transition: transform 0.15s;
+  background: var(--accent); border: 2px solid var(--bg-card); box-shadow: 0 0 0 1px var(--accent); transition: transform 0.15s;
 }
-input[type="range"]::-moz-range-thumb {
-  width: 14px; height: 14px; border-radius: 50%; background: var(--accent);
-  border: 2px solid var(--bg-card); box-shadow: 0 0 0 1px var(--accent);
-}
+input[type="range"]::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; background: var(--accent); border: 2px solid var(--bg-card); box-shadow: 0 0 0 1px var(--accent); }
 input[type="range"]:hover::-webkit-slider-thumb { transform: scale(1.2); }
-.bornes { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 10px; color: var(--text-muted); }
-.btn-secondaire {
-  align-self: flex-start; font-family: var(--font-sans); font-size: 12px; font-weight: 500;
-  padding: 6px 12px; background: transparent; border: 1px solid var(--border-mid); border-radius: 2px;
-  color: var(--text-secondary); cursor: pointer; transition: border-color 0.15s, color 0.15s;
-}
-.btn-secondaire:hover { border-color: var(--text); color: var(--text); }
-.methode p { margin: 0; font-size: 12.5px; color: var(--text-secondary); line-height: 1.55; }
-.methode { display: flex; flex-direction: column; gap: 8px; }
-.formule {
-  font-family: var(--font-mono); font-size: 11.5px; background: var(--bg-card); border: 1px solid var(--border);
-  padding: 8px 10px; color: var(--text); line-height: 1.5;
-}
+.participation-totale { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; padding-top: 12px; border-top: 1px solid var(--border-dark); font-size: 12px; color: var(--text-secondary); }
+.participation-totale b { font-family: var(--font-mono); font-size: 15px; color: var(--text); }
 
-/* Cartes des générations */
-.cartes { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); }
-.carte { background: var(--bg-card); padding: 14px 16px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.carte .nom { display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 600; }
-.pastille { width: 10px; height: 10px; flex-shrink: 0; }
-.carte .annees { font-size: 11px; color: var(--text-muted); }
-.carte .kpi { font-family: var(--font-mono); font-weight: 700; font-size: 28px; letter-spacing: -0.02em; line-height: 1.2; margin-top: 6px; font-variant-numeric: tabular-nums; }
-.carte .detail { font-size: 11px; color: var(--text-secondary); }
-.variation { font-family: var(--font-mono); font-weight: 500; font-size: 11px; }
-.hausse { color: var(--green-leg); }
-.baisse { color: var(--red); }
-.stable { color: var(--text-muted); }
-/* Les gains et pertes des candidats restent neutres : ni bons ni mauvais. */
-.neutre { color: var(--text-secondary); }
+/* Encart */
+.encart { padding: 12px 16px; background: var(--accent-light); border-left: 3px solid var(--accent); }
+.encart p { margin: 0; font-size: 12.5px; color: var(--text-secondary); line-height: 1.55; }
+.encart p.titre { font-weight: 600; color: var(--accent); margin-bottom: 2px; }
 
-/* Graphique par année de naissance */
-.figure { background: var(--bg-card); border: 1px solid var(--border); padding: 18px 18px 12px; position: relative; }
-.legende { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 12px; color: var(--text-secondary); margin-bottom: 10px; }
-.legende span { display: inline-flex; align-items: center; gap: 6px; }
+/* Sections secondaires */
+.section { padding-block: 56px 8px; display: flex; flex-direction: column; gap: 18px; }
+.section .tete-section { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 14px 24px; padding-top: 14px; border-top: 1px solid var(--border-dark); }
+.section .tete-section > div:first-child { display: flex; flex-direction: column; gap: 6px; max-width: 70ch; }
+.generations { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); }
+.generation { background: var(--bg-card); padding: 12px 14px; display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.generation .nom { font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 7px; }
+.generation .annees { font-size: 11px; color: var(--text-muted); }
+.generation b { font-family: var(--font-mono); font-size: 24px; font-weight: 700; letter-spacing: -0.02em; margin-top: 6px; font-variant-numeric: tabular-nums; }
+.generation .detail { font-size: 11px; color: var(--text-secondary); line-height: 1.45; }
+.generation .detail .plus { color: var(--green-leg); font-family: var(--font-mono); }
+.generation .detail .moins { color: var(--red); font-family: var(--font-mono); }
+
+.figure { background: var(--bg-card); border: 1px solid var(--border); padding: 16px 16px 10px; position: relative; }
 .graphique { width: 100%; overflow-x: auto; }
 .graphique svg { display: block; width: 100%; min-width: 620px; height: auto; }
 .graphique text { font-family: var(--font-sans); fill: var(--text-muted); font-size: 11px; }
 .graphique .valeur-axe { font-family: var(--font-mono); font-size: 10px; }
 .graphique .nom-gen { font-size: 11px; font-weight: 600; fill: var(--text-secondary); }
-.infobulle {
-  position: absolute; pointer-events: none; background: var(--bg-card); border: 1px solid var(--border-dark);
-  padding: 8px 10px; font-size: 12px; min-width: 190px; z-index: 5;
-}
+.infobulle { position: absolute; pointer-events: none; background: var(--bg-card); border: 1px solid var(--border-dark); padding: 8px 10px; font-size: 12px; min-width: 190px; z-index: 5; }
 .infobulle b { font-family: var(--font-mono); font-weight: 600; }
 .infobulle .ligne { display: flex; justify-content: space-between; gap: 14px; }
 .infobulle .titre { font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
 
-/* Barres comparées */
-.comparaison { display: flex; flex-direction: column; gap: 16px; background: var(--bg-card); border: 1px solid var(--border); padding: 18px; }
-.comp-ligne { display: grid; grid-template-columns: 150px minmax(0, 1fr) 88px; gap: 4px 14px; align-items: center; }
-.comp-ligne .nom { font-size: 12px; font-weight: 500; grid-row: span 2; display: flex; align-items: center; gap: 7px; }
-.piste { height: 6px; background: var(--bg-sidebar); position: relative; }
-.piste div { position: absolute; inset: 0 auto 0 0; transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
-.piste.population div { background: var(--border-mid); }
-.comp-ligne .val { font-family: var(--font-mono); font-size: 12px; font-weight: 600; text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
-.comp-ligne .val.secondaire { color: var(--text-muted); font-weight: 500; }
-@media (prefers-reduced-motion: reduce) { .piste div { transition: none; } }
-
-/* Tableau */
-.tableau { overflow-x: auto; background: var(--bg-card); border: 1px solid var(--border); }
-table { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 13px; }
-th { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); text-align: right; padding: 10px 12px; border-bottom: 1px solid var(--border-dark); vertical-align: bottom; }
+details { border-top: 1px solid var(--border); padding-top: 10px; }
+summary { cursor: pointer; font-size: 12px; font-weight: 600; color: var(--accent); }
+.tableau { overflow-x: auto; margin-top: 10px; background: var(--bg-card); border: 1px solid var(--border); }
+table { border-collapse: collapse; width: 100%; min-width: 640px; }
+th { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); text-align: right; padding: 9px 12px; border-bottom: 1px solid var(--border-dark); vertical-align: bottom; }
 th:first-child, td:first-child { text-align: left; }
-td { padding: 9px 12px; border-bottom: 1px solid var(--border); text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 12.5px; }
-td:first-child { font-family: var(--font-sans); font-weight: 500; }
+td { padding: 8px 12px; border-bottom: 1px solid var(--border); text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 12px; }
+td:first-child, td.texte { font-family: var(--font-sans); font-weight: 500; }
 tr.total td { font-weight: 700; border-bottom: 0; }
 
-.encart { padding: 10px 14px; background: var(--accent-light); border-left: 3px solid var(--accent); }
-.encart p { margin: 0; font-size: 12.5px; color: var(--text-secondary); }
-.encart p.titre { font-weight: 600; color: var(--accent); }
+.methode { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; }
+.methode > div { display: flex; flex-direction: column; gap: 8px; }
+.methode p { margin: 0; font-size: 12.5px; color: var(--text-secondary); line-height: 1.6; }
+.formule { font-family: var(--font-mono); font-size: 11.5px; background: var(--bg-card); border: 1px solid var(--border); padding: 8px 10px; line-height: 1.55; }
 
-.source { background: var(--bg-sidebar); border-top: 1px solid var(--border); padding: 10px 28px; margin-top: auto; }
+.source { background: var(--bg-sidebar); border-top: 1px solid var(--border); margin-top: 56px; }
+.source .cadre { padding-block: 12px calc(12px + env(safe-area-inset-bottom, 0px)); }
 .source p { font-size: 11px; color: var(--text-muted); margin: 0; }
-.source a { color: var(--text-muted); }
 
-/* Barre d'onglets mobile */
-.onglets { display: none; }
+@media (prefers-reduced-motion: reduce) { .piste .rempli, .piste .officiel { transition: none; } }
+
+@media (max-width: 960px) {
+  .ouverture { grid-template-columns: 1fr; gap: 28px; padding-block: 32px 28px; }
+  .simulateur { grid-template-columns: 1fr; }
+  .resultats { padding: 24px 0; }
+  .reglages { padding: 24px 0 28px; border-left: 0; border-top: 1px solid var(--border-dark); }
+  .methode { grid-template-columns: 1fr; gap: 18px; }
+}
 @media (max-width: 767px) {
-  header { height: 48px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
-  .marque small { display: none; }
-  aside { width: 100%; border-right: 0; padding: 16px max(16px, env(safe-area-inset-right, 0px)) 24px max(16px, env(safe-area-inset-left, 0px)); }
-  .app[data-onglet="analyse"] aside { display: none; }
-  .app[data-onglet="reglages"] main { display: none; }
-  .contenu { padding: 16px max(16px, env(safe-area-inset-right, 0px)) 24px max(16px, env(safe-area-inset-left, 0px)); gap: 28px; }
-  .source { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
-  h1 { font-size: 1.75rem; }
-  .cartes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .cartes .carte:first-child { grid-column: span 2; }
-  .comp-ligne { grid-template-columns: minmax(0, 1fr) 78px; }
-  .comp-ligne .nom { grid-row: auto; grid-column: span 2; }
-  .onglets {
-    display: grid; grid-template-columns: 1fr 1fr; height: calc(52px + env(safe-area-inset-bottom, 0px)); flex-shrink: 0;
-    background: var(--bg-card); border-top: 1px solid var(--border); padding-bottom: env(safe-area-inset-bottom, 0px);
-  }
-  .onglets button {
-    background: transparent; border: 0; border-top: 2px solid transparent; font-family: var(--font-sans);
-    font-size: 12px; font-weight: 500; color: var(--text-secondary); cursor: pointer;
-  }
-  .onglets button[aria-selected="true"] { border-top-color: var(--accent); font-weight: 600; color: var(--text); }
+  .cadre { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .entete .barre { height: 48px; }
+  .marque small, .entete nav { display: none; }
+  .chiffres-cles b { font-size: 28px; }
+  .tete.trois { grid-template-columns: 1fr; }
+  .tete.trois .place { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 10px; }
+  .tete.trois .place .score { grid-column: 2; grid-row: 2 / 4; margin: 0; font-size: 24px; align-self: center; }
+  .place .score { font-size: 28px; }
+  .ligne-res { grid-template-columns: minmax(0, 1fr) 58px 58px; gap: 4px 10px; }
+  .ligne-res .piste { grid-column: 1 / -1; grid-row: 2; }
+  .generations { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .generations .generation:first-child { grid-column: span 2; }
+  .commande { flex-direction: column; align-items: stretch; }
+  .bascule { display: grid; grid-auto-columns: 1fr; }
+  .section { padding-block: 40px 4px; }
 }
-
-/* Couleurs partisanes : réservées aux barres de résultats */
-:root {
-  --c-extreme-gauche: #8E1B1B; --c-lfi: #E8333A; --c-pcf: #B5121B; --c-ecolo: #00A86B; --c-ps: #ED6F8B;
-  --c-renaissance: #3366CC; --c-lr: #1B3A6B; --c-resistons: #B08A4A; --c-dlf: #4E6E9E; --c-rn: #0A1833;
-  --c-reconquete: #6B3A1F; --c-autres: #9A9A92;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) { --c-lr: #5F7FBF; --c-rn: #8C9CC8; --c-reconquete: #B07A55; --c-extreme-gauche: #C24A4A; }
-}
-:root[data-theme="dark"] { --c-lr: #5F7FBF; --c-rn: #8C9CC8; --c-reconquete: #B07A55; --c-extreme-gauche: #C24A4A; }
-
-/* Onglets des deux vues */
-.vues { display: flex; gap: 24px; border-bottom: 1px solid var(--border); }
-.vues button {
-  background: transparent; border: 0; border-bottom: 2px solid transparent; margin-bottom: -1px; padding: 0 0 10px;
-  font-family: var(--font-sans); font-size: 13px; font-weight: 500; color: var(--text-secondary); cursor: pointer;
-  transition: color 0.15s, border-color 0.15s;
-}
-.vues button:hover { color: var(--text); }
-.vues button[aria-selected="true"] { color: var(--text); font-weight: 600; border-bottom-color: var(--accent); }
-.segment.trois { grid-template-columns: 1fr 1fr 1fr; }
-.segment button:disabled { opacity: 0.45; cursor: not-allowed; }
-.segment button:disabled:hover { background: transparent; color: var(--text-secondary); }
-
-/* Simulateur : scénarios et réglages par tranche */
-.scenarios { display: flex; flex-direction: column; border: 1px solid var(--border-mid); border-radius: 2px; background: var(--bg-card); }
-.scenarios button {
-  text-align: left; background: transparent; border: 0; padding: 8px 10px; cursor: pointer;
-  font-family: var(--font-sans); font-size: 12px; color: var(--text-secondary); line-height: 1.35;
-  transition: background 0.15s, color 0.15s;
-}
-.scenarios button + button { border-top: 1px solid var(--border); }
-.scenarios button:hover { background: var(--bg-hover); color: var(--text); }
-.scenarios button[aria-pressed="true"] { background: var(--accent-light); color: var(--accent); font-weight: 600; }
-.tranche { display: flex; flex-direction: column; gap: 6px; padding: 10px 0; border-top: 1px solid var(--border); }
-.tranche:first-of-type { border-top: 0; padding-top: 0; }
-.tranche .curseur-tete span { font-weight: 600; }
-.tranche .reel { font-size: 11px; color: var(--text-muted); }
-.tranche label { font-size: 11px; color: var(--text-secondary); display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.tranche select {
-  font-family: var(--font-sans); font-size: 12px; color: var(--text); background: var(--bg-card);
-  border: 1px solid var(--border-mid); border-radius: 2px; padding: 3px 6px; max-width: 160px;
-}
-
-/* Résultats du simulateur */
-.resultats { display: flex; flex-direction: column; gap: 14px; background: var(--bg-card); border: 1px solid var(--border); padding: 18px; }
-.res-ligne { display: grid; grid-template-columns: 190px minmax(0, 1fr) 132px; gap: 4px 14px; align-items: center; }
-.res-ligne .qui { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; }
-.res-ligne .qui b { font-size: 12.5px; font-weight: 600; }
-.res-ligne .qui span { font-size: 11px; color: var(--text-muted); }
-.res-ligne .piste { height: 8px; }
-.res-ligne .piste .reel-trait { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--text); left: 0; transition: left 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
-.res-ligne .chiffres { text-align: right; white-space: nowrap; }
-.res-ligne .chiffres b { font-family: var(--font-mono); font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
-.res-ligne .chiffres .variation { display: block; }
-.res-ligne.qualifie .qui b::after { content: " · qualifié"; color: var(--accent); font-weight: 500; font-size: 11px; }
-.legende-res { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 12px; color: var(--text-secondary); }
-.legende-res span { display: inline-flex; align-items: center; gap: 6px; }
-.trait-legende { width: 2px; height: 12px; background: var(--text); display: inline-block; }
-@media (max-width: 767px) {
-  .res-ligne { grid-template-columns: minmax(0, 1fr) 96px; }
-  .res-ligne .piste { grid-column: span 2; grid-row: 2; }
-  .vues { gap: 18px; }
-}
-
-[hidden] { display: none !important; }
 </style>
 
-<div class="app" id="app" data-onglet="analyse" data-vue="poids">
-  <header>
-    <div class="marque">
-      <strong>Le poids des générations <span id="annee-titre">2027</span></strong>
-      <small id="sous-titre">Présidentielle et européennes · Qui pèse dans l'urne</small>
+<div class="entete">
+  <div class="cadre">
+    <div class="barre">
+      <div class="marque">
+        <strong>Et s'ils avaient <span>voté</span> ?</strong>
+        <small>Simulateur électoral · Générations</small>
+      </div>
+      <nav aria-label="Sommaire">
+        <a href="#simulateur">Simulateur</a>
+        <a href="#poids">Poids des générations</a>
+        <a href="#methode">Méthode</a>
+      </nav>
     </div>
-  </header>
+  </div>
   <div class="filet"></div>
+</div>
 
-  <div class="corps">
-    <aside id="reglages">
-      <!-- Réglages de la vue « Poids des générations » -->
-      <div id="reglages-poids" class="groupe" style="gap:26px">
-        <div class="groupe">
-          <p class="label">Élection</p>
-          <div class="segment trois" role="group" aria-label="Élection">
-            <button type="button" id="btn-2022" data-election="2022">Prés. 2022<small>observée</small></button>
-            <button type="button" id="btn-2024" data-election="2024">Europ. 2024<small>observée</small></button>
-            <button type="button" id="btn-2027" data-election="2027">Prés. 2027<small>projection</small></button>
-          </div>
+<main>
+  <div class="cadre">
+    <!-- Ouverture -->
+    <section class="ouverture">
+      <div class="texte">
+        <p class="label">Présidentielle 2022 · Européennes 2024</p>
+        <h1>Et si les jeunes avaient voté <em>comme leurs aînés</em>&nbsp;?</h1>
+        <p class="chapo">Chaque génération ne vote ni autant ni de la même façon. Faites varier la participation et les choix de vote de chaque tranche d'âge, et voyez ce que seraient devenus les résultats officiels de la présidentielle 2022 et des européennes 2024.</p>
+      </div>
+      <div class="chiffres-cles" id="chiffres-cles"></div>
+    </section>
+
+    <!-- Simulateur -->
+    <section id="simulateur" aria-label="Simulateur">
+      <div class="commande">
+        <div class="bascule" role="group" aria-label="Scrutin">
+          <button type="button" data-sim-election="2022">Présidentielle 2022 · 1er tour</button>
+          <button type="button" data-sim-election="2024">Européennes 2024</button>
         </div>
-        <div class="groupe">
-          <p class="label">Tour de scrutin</p>
-          <div class="segment" role="group" aria-label="Tour de scrutin">
-            <button type="button" id="btn-t1" data-tour="t1">1er tour</button>
-            <button type="button" id="btn-t2" data-tour="t2">2d tour</button>
-          </div>
-        </div>
-        <div class="groupe">
-          <p class="label">Hypothèse · Et si…</p>
-          <div class="curseur-tete">
-            <span>Participation des moins de 35 ans</span>
-            <output id="bonus-valeur" for="bonus">±0 pt</output>
-          </div>
-          <input type="range" id="bonus" min="-15" max="20" step="1" value="0" aria-label="Variation de la participation des moins de 35 ans, en points">
-          <div class="bornes"><span>−15 pts</span><span>niveau observé</span><span>+20 pts</span></div>
-          <button type="button" class="btn-secondaire" id="reinitialiser">Revenir au niveau observé</button>
-        </div>
-        <div class="methode">
-          <p class="label">Méthode</p>
-          <div class="formule">votants = population<br>× part inscrite<br>× taux de participation</div>
-          <p>Chaque année de naissance est traitée séparément. La population vient des estimations de l'INSEE au 1er janvier, la part inscrite du Répertoire électoral unique, et le taux de participation de l'enquête de l'INSEE sur la présidentielle de 2022, qui repose sur les listes d'émargement.</p>
-          <p>L'INSEE n'a pas mesuré la participation aux européennes de 2024. Pour ce scrutin, le niveau de chaque tranche d'âge vient de l'enquête Ipsos du jour du vote, et la forme à l'intérieur de chaque tranche reprend celle de 2022.</p>
-          <p>Pour 2027, on part de la population estimée au 1er janvier 2026 : chaque génération vieillit d'un an et évolue comme entre 2025 et 2026, sous l'effet des décès et des migrations. On suppose qu'à âge égal, on votera comme en 2022. Les jeunes qui auront 18 ans entre janvier et avril 2027 ne sont pas comptés.</p>
-          <p>Le champ couvre la France hors Français de l'étranger. Les résultats sont des ordres de grandeur, à lire au point près.</p>
-        </div>
+        <div class="puces" id="scenarios" role="group" aria-label="Scénarios"></div>
       </div>
 
-      <!-- Réglages de la vue « Simulateur » -->
-      <div id="reglages-simu" class="groupe" style="gap:26px" hidden>
-        <div class="groupe">
-          <p class="label">Scrutin</p>
-          <div class="segment" role="group" aria-label="Scrutin simulé">
-            <button type="button" data-sim-election="2022">Prés. 2022<small>1er tour</small></button>
-            <button type="button" data-sim-election="2024">Europ. 2024<small>tour unique</small></button>
+      <div class="simulateur">
+        <div class="resultats">
+          <div class="verdict">
+            <p class="label" id="sim-label"></p>
+            <h2 id="sim-titre"></h2>
+            <p id="sim-chapo"></p>
           </div>
-        </div>
-        <div class="groupe">
-          <p class="label">Scénarios</p>
-          <div class="scenarios" id="scenarios"></div>
-        </div>
-        <div class="groupe">
-          <p class="label">Réglage fin par tranche d'âge</p>
-          <div id="tranches"></div>
-        </div>
-        <div class="methode">
-          <p class="label">Méthode</p>
-          <div class="formule">score = Σ votants de la tranche<br>× vote de la tranche</div>
-          <p>Le vote de chaque tranche d'âge vient des enquêtes Ipsos du jour du vote (environ 4 000 inscrits en 2022, 8 900 en 2024). Ces pourcentages sont ajustés pour que, avec la participation réelle, on retrouve exactement les résultats officiels.</p>
-          <p>Quand la participation d'une tranche augmente, on suppose que les nouveaux votants choisissent comme ceux de leur âge qui ont voté. C'est l'hypothèse la plus discutable : les abstentionnistes ont souvent des préférences différentes.</p>
-          <p>Chaque pourcentage d'Ipsos par tranche comporte une marge d'erreur de deux à quatre points. Un écart de quelques dixièmes de point entre deux candidats n'est donc pas significatif.</p>
-        </div>
-      </div>
-    </aside>
-
-    <main id="analyse">
-      <div class="contenu">
-        <div class="vues" role="tablist" aria-label="Vues">
-          <button type="button" role="tab" id="vue-btn-poids" data-vue="poids" aria-selected="true">Poids des générations</button>
-          <button type="button" role="tab" id="vue-btn-simu" data-vue="simu" aria-selected="false">Simulateur de scores</button>
+          <div class="tete" id="sim-tete"></div>
+          <div class="legende">
+            <span><span class="pastille" style="background:var(--text-muted)"></span>Score simulé, dans la couleur du parti</span>
+            <span><span class="trait"></span>Résultat officiel</span>
+          </div>
+          <div class="liste" id="sim-liste"></div>
         </div>
 
-        <!-- Vue « Poids des générations » -->
-        <div id="vue-poids" style="display:flex;flex-direction:column;gap:inherit">
-          <section>
-            <p class="label" id="sur-titre"></p>
-            <h1 id="titre"></h1>
-            <p class="chapo" id="chapo"></p>
-          </section>
-
-          <section>
-            <p class="label">Part de chaque génération dans les votants</p>
-            <div style="height:10px"></div>
-            <div class="cartes" id="cartes"></div>
-          </section>
-
-          <section>
-            <p class="label">Année par année</p>
-            <h2>Les classes nombreuses du baby-boom votent aussi davantage</h2>
-            <p class="note" style="margin-bottom:14px">Chaque colonne représente les personnes nées une année donnée et majeures au moment du scrutin. La partie colorée correspond aux votants estimés, le gris aux inscrits qui s'abstiennent, le gris clair aux adultes qui ne sont pas inscrits (dont les étrangers non européens, qui ne peuvent pas voter).</p>
-            <div class="figure" id="figure">
-              <div class="legende">
-                <span><span class="pastille" style="background:var(--g2)"></span>Votants (couleur de la génération)</span>
-                <span><span class="pastille" style="background:var(--abstention)"></span>Inscrits abstentionnistes</span>
-                <span><span class="pastille" style="background:var(--non-inscrits);outline:1px solid var(--border-mid)"></span>Adultes non inscrits</span>
-              </div>
-              <div class="graphique" id="graphique"></div>
-              <div class="infobulle" id="infobulle" hidden></div>
-            </div>
-          </section>
-
-          <section>
-            <p class="label">Population et bulletins</p>
-            <h2>Qui est surreprésenté dans l'urne ?</h2>
-            <p class="note" style="margin-bottom:14px">La barre grise donne la part de la génération parmi les adultes qui résident en France, la barre colorée sa part parmi les votants. L'écart mesure le surpoids ou le sous-poids électoral.</p>
-            <div class="comparaison" id="comparaison"></div>
-          </section>
-
-          <section>
-            <p class="label">Détail des estimations</p>
-            <div style="height:10px"></div>
-            <div class="tableau"><table id="tableau"></table></div>
-          </section>
-
+        <div class="reglages">
+          <div class="entete-reglages">
+            <p class="label">Réglage par tranche d'âge</p>
+            <button type="button" class="btn-lien" id="sim-reinit">Revenir au résultat officiel</button>
+          </div>
+          <p class="note" style="font-size:12px">Le curseur règle la participation, le trait fin marque son niveau réel. Le menu choisit de quelle tranche on reprend les choix de vote.</p>
+          <div id="sim-ages"></div>
+          <div class="participation-totale"><span>Participation simulée</span><span><b id="sim-total"></b> <span id="sim-total-reel"></span></span></div>
           <div class="encart">
-            <p class="titre">Comment lire ces chiffres</p>
-            <p>Le taux de participation par âge est celui observé, appliqué à l'âge qu'a chaque génération le jour du vote. Une génération ne garde donc pas son comportement d'une élection à l'autre : en vieillissant, elle prend celui de ses aînés. Aux européennes, l'abstention est beaucoup plus forte chez les jeunes, ce qui accroît encore le poids des plus âgés.</p>
-          </div>
-        </div>
-
-        <!-- Vue « Simulateur de scores » -->
-        <div id="vue-simu" style="display:flex;flex-direction:column;gap:inherit" hidden>
-          <section>
-            <p class="label" id="sim-sur-titre"></p>
-            <h1 id="sim-titre"></h1>
-            <p class="chapo" id="sim-chapo"></p>
-          </section>
-
-          <section>
-            <p class="label">Scores simulés</p>
-            <div style="height:10px"></div>
-            <div class="resultats">
-              <div class="legende-res">
-                <span><span class="pastille" style="background:var(--c-renaissance)"></span>Score simulé (couleur du parti)</span>
-                <span><span class="trait-legende"></span>Résultat officiel</span>
-              </div>
-              <div id="sim-resultats" style="display:flex;flex-direction:column;gap:14px"></div>
-            </div>
-          </section>
-
-          <section>
-            <p class="label">Qui vote dans ce scénario</p>
-            <h2>Le poids de chaque tranche d'âge dans les suffrages</h2>
-            <p class="note" style="margin-bottom:14px">Les tranches d'âge sont celles de l'enquête Ipsos. La colonne « vote comme » indique de quelle tranche on reprend les choix de vote.</p>
-            <div class="tableau"><table id="sim-tableau"></table></div>
-          </section>
-
-          <div class="encart">
-            <p class="titre">Pourquoi la participation seule change peu les scores</p>
-            <p>Chaque tranche d'âge vote pour tous les candidats, dans des proportions qui diffèrent de quelques points seulement. Faire voter davantage une tranche déplace donc les scores de quelques dixièmes de point. Les écarts deviennent nets quand on change aussi les choix de vote d'une tranche, par exemple en faisant voter les moins de 35 ans comme les 70 ans et plus.</p>
+            <p class="titre">La participation seule change peu les scores</p>
+            <p>Chaque tranche d'âge vote pour tous les candidats, dans des proportions voisines. Les écarts deviennent nets quand on change aussi ses choix de vote.</p>
           </div>
         </div>
       </div>
+    </section>
 
-      <div class="source">
-        <p id="source"></p>
+    <!-- Poids des générations -->
+    <section class="section" id="poids">
+      <div class="tete-section">
+        <div>
+          <p class="label">Pour comprendre · Qui pèse dans l'urne</p>
+          <h2 id="poids-titre"></h2>
+          <p class="note" id="poids-chapo"></p>
+        </div>
+        <div class="bascule petite" role="group" aria-label="Élection">
+          <button type="button" data-election="2022">Prés. 2022</button>
+          <button type="button" data-election="2024">Europ. 2024</button>
+          <button type="button" data-election="2027">Prés. 2027 (projection)</button>
+        </div>
       </div>
-    </main>
+      <div class="generations" id="generations"></div>
+      <div class="figure" id="figure">
+        <div class="legende" style="margin-bottom:8px">
+          <span><span class="pastille" style="background:var(--g2)"></span>Votants, dans la couleur de la génération</span>
+          <span><span class="pastille" style="background:var(--abstention)"></span>Inscrits abstentionnistes</span>
+          <span><span class="pastille" style="background:var(--non-inscrits);outline:1px solid var(--border-mid)"></span>Adultes non inscrits</span>
+        </div>
+        <div class="graphique" id="graphique"></div>
+        <div class="infobulle" id="infobulle" hidden></div>
+      </div>
+      <details>
+        <summary>Voir le détail des estimations par génération</summary>
+        <div class="tableau"><table id="tableau"></table></div>
+      </details>
+    </section>
+
+    <!-- Méthode -->
+    <section class="section" id="methode">
+      <div class="tete-section"><div><p class="label">Méthode et limites</p><h2>Comment le simulateur calcule</h2></div></div>
+      <div class="methode">
+        <div>
+          <h3>Les votants</h3>
+          <div class="formule">votants = population × part inscrite × participation</div>
+          <p>Le calcul est fait pour chaque année de naissance. La population vient des estimations de l'INSEE au 1er janvier, la part inscrite du Répertoire électoral unique. La participation de 2022 vient de l'enquête de l'INSEE, fondée sur les listes d'émargement ; celle de 2024, de l'enquête Ipsos du jour du vote, faute d'enquête de l'INSEE.</p>
+        </div>
+        <div>
+          <h3>Les scores</h3>
+          <div class="formule">score = Σ votants de la tranche × vote de la tranche</div>
+          <p>Le vote de chaque tranche d'âge vient des enquêtes Ipsos du jour du vote (environ 4 000 inscrits en 2022, 8 900 en 2024). Ces pourcentages sont légèrement ajustés, par calage itératif, pour que la participation réelle redonne exactement les résultats officiels.</p>
+        </div>
+        <div>
+          <h3>Les limites</h3>
+          <p>Quand une tranche vote davantage, on suppose que ses nouveaux votants choisissent comme ceux de leur âge qui ont voté ; or les abstentionnistes ont souvent d'autres préférences. Chaque pourcentage d'Ipsos par âge comporte une marge d'erreur de deux à quatre points : quelques dixièmes d'écart entre deux candidats ne sont pas significatifs.</p>
+          <p>La projection 2027 fait vieillir d'un an la population de 2026 et suppose qu'à âge égal, on votera comme en 2022. Le champ exclut les Français de l'étranger.</p>
+        </div>
+      </div>
+    </section>
   </div>
 
-  <nav class="onglets" role="tablist" aria-label="Sections">
-    <button type="button" role="tab" id="onglet-analyse" data-onglet="analyse" aria-selected="true">Analyse</button>
-    <button type="button" role="tab" id="onglet-reglages" data-onglet="reglages" aria-selected="false">Réglages et méthode</button>
-  </nav>
-</div>
+  <footer class="source">
+    <div class="cadre">
+      <p>Source : ministère de l'Intérieur (résultats officiels) ; Ipsos, « Sociologie des électorats », 1er tour de la présidentielle 2022 et européennes 2024 ; INSEE via insee.fr (estimations de population, Répertoire électoral unique 2022, 2024 et 2026, enquête sur la participation électorale 2022) — Simulation et projection à titre indicatif</p>
+    </div>
+  </footer>
+</main>
 
 <script src="donnees.js"></script>
 <script>
-// Les cinq générations, définies par leurs années de naissance.
-const GENERATIONS = [
-  { id: 'g1', nom: 'Nés avant 1946', sujet: 'les personnes nées avant 1946', annees: 'jusqu’à 1945', debut: 1900, fin: 1945 },
-  { id: 'g2', nom: 'Baby-boomers', sujet: 'les baby-boomers', annees: '1946-1964', debut: 1946, fin: 1964 },
-  { id: 'g3', nom: 'Génération X', sujet: 'la génération X', annees: '1965-1980', debut: 1965, fin: 1980 },
-  { id: 'g4', nom: 'Génération Y', sujet: 'la génération Y', annees: '1981-1996', debut: 1981, fin: 1996 },
-  { id: 'g5', nom: 'Génération Z', sujet: 'la génération Z', annees: '1997 et après', debut: 1997, fin: 2012 },
-];
+/* ───────────── Constantes et formats ───────────── */
 
-const ELECTIONS = {
-  '2022': { nom: 'Présidentielle 2022', court: 'la présidentielle 2022', statut: 'Estimation', comparaison: '2027' },
-  '2024': { nom: 'Européennes 2024', court: 'les européennes 2024', statut: 'Estimation', comparaison: '2022' },
-  '2027': { nom: 'Présidentielle 2027', court: 'la présidentielle 2027', statut: 'Projection', comparaison: '2022' },
-};
+const GENERATIONS = [
+  { id: 'g1', nom: 'Nés avant 1946', sujet: 'les personnes nées avant 1946', debut: 1900, fin: 1945 },
+  { id: 'g2', nom: 'Baby-boomers', sujet: 'les baby-boomers', debut: 1946, fin: 1964 },
+  { id: 'g3', nom: 'Génération X', sujet: 'la génération X', debut: 1965, fin: 1980 },
+  { id: 'g4', nom: 'Génération Y', sujet: 'la génération Y', debut: 1981, fin: 1996 },
+  { id: 'g5', nom: 'Génération Z', sujet: 'la génération Z', debut: 1997, fin: 2012 },
+];
 
 // Couleur de chaque candidat ou liste, d'après son parti.
 const COULEURS = {
@@ -502,195 +414,21 @@ const COULEURS = {
   zemmour: 'reconquete', marechal: 'reconquete', autres: 'autres',
 };
 
-const SOURCES = {
-  poids: 'Source : INSEE via insee.fr (estimations de population au 1er janvier, Répertoire électoral unique 2022, 2024 et 2026, enquête sur la participation électorale 2022, Insee Première n° 1928 et n° 1929) ; Ipsos pour la participation par âge aux européennes 2024 · Calculs et projection 2027 : estimations à titre indicatif',
-  simu: 'Source : ministère de l’Intérieur (résultats officiels) ; Ipsos, « Sociologie des électorats », 1er tour de la présidentielle 2022 et européennes 2024 ; INSEE (population, Répertoire électoral unique, participation 2022) · Simulation à titre indicatif',
-};
-
-const etat = { vue: 'poids', election: '2027', tour: 't1', bonus: 0 };
-
 // Formats français : virgule décimale et espace insécable avant « % ».
 const NBSP = ' ';
-const pct = (x, d = 1) => (x * 100).toLocaleString('fr-FR', { minimumFractionDigits: d, maximumFractionDigits: d }) + NBSP + '%';
+const nombre = (x, d) => x.toLocaleString('fr-FR', { minimumFractionDigits: d, maximumFractionDigits: d });
+const pct = (x, d = 1) => nombre(x * 100, d) + NBSP + '%';
 const pts = x => {
   const v = Math.round(x * 1000) / 10;
   const signe = v > 0 ? '+' : v < 0 ? '−' : '±';
-  return signe + Math.abs(v).toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + NBSP + 'pt' + (Math.abs(v) >= 2 ? 's' : '');
+  return signe + nombre(Math.abs(v), 1) + NBSP + 'pt' + (Math.abs(v) >= 2 ? 's' : '');
 };
-const ecartPts = x => (x * 100).toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + NBSP + 'pt' + (x * 100 >= 2 ? 's' : '');
-const millions = x => (x / 1e6).toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + NBSP + 'million' + (x >= 2e6 ? 's' : '');
+const ecartPts = x => nombre(x * 100, 1) + NBSP + 'pt' + (x * 100 >= 2 ? 's' : '');
+const millions = x => nombre(x / 1e6, 1) + NBSP + 'million' + (x >= 2e6 ? 's' : '');
 const entier = x => Math.round(x).toLocaleString('fr-FR').replace(/ /g, NBSP);
-const generationDe = naissance => GENERATIONS.find(g => naissance >= g.debut && naissance <= g.fin);
-const classeVariation = x => Math.abs(x) < 0.0005 ? 'stable' : x > 0 ? 'hausse' : 'baisse';
-const fleche = x => Math.abs(x) < 0.0005 ? '' : x > 0 ? '▲ ' : '▼ ';
+const somme = (liste, f) => liste.reduce((s, x) => s + f(x), 0);
 
-/* ───────────── Vue « Poids des générations » ───────────── */
-
-// Calcule, pour une élection et un tour, les votants de chaque année de naissance.
-function calculer(election, tour, bonus) {
-  const lignes = window.DONNEES.elections[election];
-  const cle = lignes[0][tour] === undefined ? 't1' : tour;
-  const annees = lignes.map(d => {
-    const taux = Math.min(1, Math.max(0, d[cle] + (d.age < 35 ? bonus / 100 : 0)));
-    const inscrits = d.population * d.inscription;
-    return { ...d, inscrits, votants: inscrits * taux, taux, generation: generationDe(d.naissance) };
-  });
-  const total = { population: 0, inscrits: 0, votants: 0 };
-  annees.forEach(a => { total.population += a.population; total.inscrits += a.inscrits; total.votants += a.votants; });
-  const generations = GENERATIONS.map(g => {
-    const membres = annees.filter(a => a.generation === g);
-    const somme = c => membres.reduce((s, a) => s + a[c], 0);
-    const population = somme('population'), inscrits = somme('inscrits'), votants = somme('votants');
-    const ages = membres.map(a => a.age);
-    return {
-      ...g, population, inscrits, votants,
-      agesMin: Math.min(...ages), agesMax: Math.max(...ages),
-      partPopulation: population / total.population,
-      partVotants: votants / total.votants,
-      participation: votants / inscrits,
-    };
-  });
-  return { annees, generations, total };
-}
-
-function rendrePoids() {
-  const e = ELECTIONS[etat.election];
-  const tourUnique = etat.election === '2024';
-  const tour = tourUnique ? 't1' : etat.tour;
-  const r = calculer(etat.election, tour, etat.bonus);
-  const autre = e.comparaison;
-  const rAutre = calculer(autre, autre === '2024' ? 't1' : tour, etat.bonus);
-  const tourTexte = tourUnique ? 'tour unique' : tour === 't1' ? '1er tour' : '2d tour';
-  const auTour = tourUnique ? '' : ' au ' + tourTexte;
-
-  document.getElementById('annee-titre').textContent = etat.election;
-  document.getElementById('sur-titre').textContent = e.statut + ' · ' + e.nom + ' · ' + tourTexte +
-    (etat.bonus ? ' · Hypothèse ' + (etat.bonus > 0 ? '+' : '−') + Math.abs(etat.bonus) + NBSP + 'pts chez les moins de 35 ans' : '');
-
-  // Titre : la génération la plus lourde dans l'urne.
-  const premiere = [...r.generations].sort((a, b) => b.partVotants - a.partVotants)[0];
-  const pluriel = premiere.sujet.startsWith('les ');
-  const verbe = etat.election === '2027' ? (pluriel ? 'pèseraient' : 'pèserait') : (pluriel ? 'ont pesé' : 'a pesé');
-  const quand = etat.election === '2024' ? 'Aux européennes de 2024' : 'En ' + etat.election;
-  document.getElementById('titre').textContent = quand + ', ' + premiere.sujet + ' ' + verbe + ' ' + pct(premiere.partVotants, 0) + ' des votants';
-  const boomers = r.generations[1], y = r.generations[3], z = r.generations[4];
-  document.getElementById('chapo').textContent =
-    'Sur environ ' + millions(r.total.votants) + ' de votants estimés' + auTour + ', les baby-boomers, âgés de ' + boomers.agesMin + ' à ' + boomers.agesMax +
-    ' ans, représentent ' + pct(boomers.partPopulation) + ' des adultes mais ' + pct(boomers.partVotants) + ' des bulletins. La génération Y, presque aussi nombreuse (' +
-    pct(y.partPopulation) + ' des adultes), ne fournit que ' + pct(y.partVotants) + ' des votants, et la génération Z ' + pct(z.partVotants) + '.';
-
-  // Cartes : la variation est présentée dans le sens chronologique.
-  const libelleVariation = etat.election === '2022' ? ' en 2027' : ' par rapport à 2022';
-  document.getElementById('cartes').innerHTML = r.generations.map((g, i) => {
-    const ecart = etat.election === '2022' ? rAutre.generations[i].partVotants - g.partVotants : g.partVotants - rAutre.generations[i].partVotants;
-    return '<div class="carte">' +
-      '<span class="nom"><span class="pastille" style="background:var(--' + g.id + ')"></span>' + g.nom + '</span>' +
-      '<span class="annees">Nés ' + (g.debut === 1900 ? 'avant 1946' : g.annees.replace('-', ' à ')) + ' · ' + g.agesMin + '-' + g.agesMax + NBSP + 'ans</span>' +
-      '<span class="kpi">' + pct(g.partVotants) + '</span>' +
-      '<span class="variation ' + classeVariation(ecart) + '">' + fleche(ecart) + pts(ecart) + libelleVariation + '</span>' +
-      '<span class="detail">' + pct(g.partPopulation) + ' des adultes</span>' +
-      '</div>';
-  }).join('');
-
-  rendreGraphique(r);
-
-  const max = Math.max(...r.generations.map(g => Math.max(g.partPopulation, g.partVotants)));
-  document.getElementById('comparaison').innerHTML = r.generations.map(g => {
-    const ecart = g.partVotants - g.partPopulation;
-    return '<div class="comp-ligne">' +
-      '<span class="nom"><span class="pastille" style="background:var(--' + g.id + ')"></span>' + g.nom + '</span>' +
-      '<div class="piste population" title="Part des adultes"><div style="width:' + (g.partPopulation / max * 100) + '%"></div></div>' +
-      '<span class="val secondaire">' + pct(g.partPopulation) + '</span>' +
-      '<div class="piste" title="Part des votants"><div style="width:' + (g.partVotants / max * 100) + '%;background:var(--' + g.id + ')"></div></div>' +
-      '<span class="val">' + pct(g.partVotants) + ' <span class="variation ' + (ecart >= 0 ? 'hausse' : 'baisse') + '">' + pts(ecart) + '</span></span>' +
-      '</div>';
-  }).join('');
-
-  const t = r.total;
-  document.getElementById('tableau').innerHTML =
-    '<thead><tr><th>Génération</th><th>Âge au scrutin</th><th>Adultes</th><th>Inscrits</th><th>Participation</th><th>Votants</th><th>Part des adultes</th><th>Part des votants</th></tr></thead><tbody>' +
-    r.generations.map(g => '<tr><td>' + g.nom + '</td><td>' + g.agesMin + '-' + g.agesMax + '</td><td>' + entier(g.population) + '</td><td>' + entier(g.inscrits) +
-      '</td><td>' + pct(g.participation) + '</td><td>' + entier(g.votants) + '</td><td>' + pct(g.partPopulation) + '</td><td>' + pct(g.partVotants) + '</td></tr>').join('') +
-    '<tr class="total"><td>Ensemble</td><td>18 ans et plus</td><td>' + entier(t.population) + '</td><td>' + entier(t.inscrits) + '</td><td>' + pct(t.votants / t.inscrits) +
-    '</td><td>' + entier(t.votants) + '</td><td>100,0' + NBSP + '%</td><td>100,0' + NBSP + '%</td></tr></tbody>';
-
-  document.querySelectorAll('[data-election]').forEach(b => b.setAttribute('aria-pressed', b.dataset.election === etat.election));
-  document.querySelectorAll('[data-tour]').forEach(b => {
-    b.disabled = tourUnique;
-    b.setAttribute('aria-pressed', !tourUnique && b.dataset.tour === etat.tour);
-  });
-  document.getElementById('bonus-valeur').textContent = etat.bonus === 0 ? '±0' + NBSP + 'pt' : (etat.bonus > 0 ? '+' : '−') + Math.abs(etat.bonus) + NBSP + 'pts';
-}
-
-// Graphique en colonnes empilées : une colonne par année de naissance.
-const DEBUT = 1920, FIN = 2008;
-const L = 900, H = 340, M = { haut: 30, droite: 10, bas: 34, gauche: 46 };
-const YMAX = 1000000;
-
-function rendreGraphique(r) {
-  const largeur = (L - M.gauche - M.droite) / (FIN - DEBUT + 1);
-  const x = annee => M.gauche + (annee - DEBUT) * largeur;
-  const y = v => M.haut + (H - M.haut - M.bas) * (1 - v / YMAX);
-  let svg = '<svg viewBox="0 0 ' + L + ' ' + H + '" role="img" aria-label="Population, inscrits et votants par année de naissance">';
-
-  for (let v = 0; v <= YMAX; v += 200000) {
-    svg += '<line x1="' + M.gauche + '" x2="' + (L - M.droite) + '" y1="' + y(v) + '" y2="' + y(v) + '" stroke="var(--border)" stroke-width="1"/>';
-    svg += '<text class="valeur-axe" x="' + (M.gauche - 6) + '" y="' + (y(v) + 3) + '" text-anchor="end">' + (v === 0 ? '0' : (v / 1000) + NBSP + 'k') + '</text>';
-  }
-  GENERATIONS.forEach(g => {
-    const d = Math.max(g.debut, DEBUT), f = Math.min(g.fin, FIN);
-    if (g.debut > DEBUT) svg += '<line x1="' + x(g.debut) + '" x2="' + x(g.debut) + '" y1="' + (M.haut - 18) + '" y2="' + y(0) + '" stroke="var(--border-mid)" stroke-dasharray="2 3"/>';
-    svg += '<text class="nom-gen" x="' + ((x(d) + x(f + 1)) / 2) + '" y="' + (M.haut - 8) + '" text-anchor="middle">' + g.nom.replace('Génération ', 'Gén. ') + '</text>';
-  });
-  r.annees.forEach(a => {
-    if (a.naissance < DEBUT) return;
-    const x0 = x(a.naissance) + 1, w = Math.max(1, largeur - 2);
-    const pile = [[a.votants, 'var(--' + a.generation.id + ')'], [a.inscrits - a.votants, 'var(--abstention)'], [a.population - a.inscrits, 'var(--non-inscrits)']];
-    let cumul = 0;
-    pile.forEach(([v, couleur]) => {
-      const haut = y(cumul + v), bas = y(cumul);
-      svg += '<rect x="' + x0 + '" y="' + haut + '" width="' + w + '" height="' + Math.max(0, bas - haut) + '" fill="' + couleur + '"/>';
-      cumul += v;
-    });
-    svg += '<rect class="zone" data-annee="' + a.naissance + '" x="' + x(a.naissance) + '" y="' + M.haut + '" width="' + largeur + '" height="' + (H - M.haut - M.bas) + '" fill="transparent"/>';
-  });
-  svg += '<line x1="' + M.gauche + '" x2="' + (L - M.droite) + '" y1="' + y(0) + '" y2="' + y(0) + '" stroke="var(--border-dark)"/>';
-  for (let annee = DEBUT; annee <= FIN; annee += 10) {
-    svg += '<text class="valeur-axe" x="' + (x(annee) + largeur / 2) + '" y="' + (H - M.bas + 16) + '" text-anchor="middle">' + annee + '</text>';
-  }
-  svg += '<text x="' + (L - M.droite) + '" y="' + (H - 4) + '" text-anchor="end">année de naissance</text>';
-  svg += '</svg>';
-  document.getElementById('graphique').innerHTML = svg;
-
-  const bulle = document.getElementById('infobulle');
-  const figure = document.getElementById('figure');
-  const parAnnee = Object.fromEntries(r.annees.map(a => [a.naissance, a]));
-  document.querySelectorAll('#graphique .zone').forEach(zone => {
-    const montrer = () => {
-      const a = parAnnee[zone.dataset.annee];
-      bulle.innerHTML =
-        '<div class="titre"><span class="pastille" style="background:var(--' + a.generation.id + ')"></span>Nés en ' + a.naissance + ' · ' + a.age + NBSP + 'ans</div>' +
-        '<div class="ligne"><span>Adultes</span><b>' + entier(a.population) + '</b></div>' +
-        '<div class="ligne"><span>Inscrits</span><b>' + entier(a.inscrits) + '</b></div>' +
-        '<div class="ligne"><span>Votants estimés</span><b>' + entier(a.votants) + '</b></div>' +
-        '<div class="ligne"><span>Participation</span><b>' + pct(a.taux) + '</b></div>' +
-        '<div class="ligne"><span>Part des votants</span><b>' + pct(a.votants / r.total.votants, 2) + '</b></div>';
-      bulle.hidden = false;
-      const cadre = figure.getBoundingClientRect(), z = zone.getBoundingClientRect();
-      let gauche = z.left - cadre.left + z.width + 10;
-      if (gauche + bulle.offsetWidth > cadre.width - 8) gauche = z.left - cadre.left - bulle.offsetWidth - 10;
-      bulle.style.left = Math.max(8, gauche) + 'px';
-      bulle.style.top = '64px';
-      zone.setAttribute('fill', 'var(--text)'); zone.setAttribute('fill-opacity', '0.06');
-    };
-    const cacher = () => { bulle.hidden = true; zone.setAttribute('fill', 'transparent'); };
-    zone.addEventListener('mouseenter', montrer);
-    zone.addEventListener('mouseleave', cacher);
-    zone.addEventListener('touchstart', montrer, { passive: true });
-  });
-}
-
-/* ───────────── Vue « Simulateur de scores » ───────────── */
+/* ───────────── Simulateur ───────────── */
 
 const sim = { election: '2022', participation: [], comme: [], scenario: 'reel' };
 
@@ -699,58 +437,53 @@ function tranchesReelles(election) {
   const S = window.DONNEES.simulation[election];
   return S.bornes.map(([min, max], j) => {
     const lignes = window.DONNEES.elections[election].filter(l => l.age >= min && l.age <= max);
-    const inscrits = lignes.reduce((s, l) => s + l.population * l.inscription, 0);
-    const votants = lignes.reduce((s, l) => s + l.population * l.inscription * l.t1, 0);
-    return { nom: S.tranches[j], inscrits, participation: votants / inscrits };
+    const inscrits = somme(lignes, l => l.population * l.inscription);
+    return { nom: S.tranches[j], inscrits, participation: somme(lignes, l => l.population * l.inscription * l.t1) / inscrits };
   });
 }
 
-// Scénarios prêts à l'emploi : ils fixent la participation et les choix de vote de chaque tranche.
+// Scénarios prêts à l'emploi : participation (p) et tranche dont on reprend le vote (c), pour chaque tranche.
 const SCENARIOS = [
   { id: 'reel', nom: 'Résultat officiel', appliquer: t => ({ p: t.map(x => x.participation), c: t.map((_, j) => j) }) },
-  { id: 'tous', nom: 'Tous les inscrits votent', appliquer: t => ({ p: t.map(() => 1), c: t.map((_, j) => j) }) },
+  { id: 'tous', nom: 'Tout le monde vote', appliquer: t => ({ p: t.map(() => 1), c: t.map((_, j) => j) }) },
   { id: 'jeunes-participent', nom: 'Les moins de 35 ans votent autant que les 60-69 ans',
     appliquer: t => ({ p: t.map((x, j) => j < 2 ? t[4].participation : x.participation), c: t.map((_, j) => j) }) },
   { id: 'jeunes-comme-aines', nom: 'Les moins de 35 ans votent comme les 70 ans et plus',
     appliquer: t => ({ p: t.map((x, j) => j < 2 ? t[5].participation : x.participation), c: t.map((_, j) => j < 2 ? 5 : j) }) },
   { id: 'aines-comme-jeunes', nom: 'Les 60 ans et plus votent comme les 25-34 ans',
     appliquer: t => ({ p: t.map((x, j) => j >= 4 ? t[1].participation : x.participation), c: t.map((_, j) => j >= 4 ? 1 : j) }) },
-  { id: 'sans-aines', nom: 'Les 70 ans et plus ne votent pas',
+  { id: 'sans-aines', nom: 'Les 70 ans et plus s’abstiennent',
     appliquer: t => ({ p: t.map((x, j) => j === 5 ? 0 : x.participation), c: t.map((_, j) => j) }) },
 ];
 
 function appliquerScenario(id) {
-  const t = tranchesReelles(sim.election);
-  const s = SCENARIOS.find(x => x.id === id).appliquer(t);
+  const s = SCENARIOS.find(x => x.id === id).appliquer(tranchesReelles(sim.election));
   sim.participation = s.p; sim.comme = s.c; sim.scenario = id;
 }
 
 function scores(election, participation, comme) {
   const S = window.DONNEES.simulation[election];
-  const t = tranchesReelles(election);
-  const votants = t.map((x, j) => x.inscrits * participation[j]);
+  const votants = tranchesReelles(election).map((x, j) => x.inscrits * participation[j]);
   const total = votants.reduce((a, b) => a + b, 0);
   return {
     votants, total,
-    candidats: S.candidats.map(c => ({
-      ...c,
-      score: total ? votants.reduce((s, v, j) => s + v * c.parTranche[comme[j]], 0) / total : 0,
-    })),
+    candidats: S.candidats.map(c => ({ ...c, score: total ? votants.reduce((s, v, j) => s + v * c.parTranche[comme[j]], 0) / total : 0 })),
   };
 }
 
-function construireReglagesSimu() {
+function construireReglages() {
   const t = tranchesReelles(sim.election);
-  document.getElementById('scenarios').innerHTML = SCENARIOS.map(s =>
-    '<button type="button" data-scenario="' + s.id + '">' + s.nom + '</button>').join('');
-  document.getElementById('tranches').innerHTML = t.map((x, j) =>
-    '<div class="tranche">' +
-      '<div class="curseur-tete"><span>' + x.nom + '</span><output id="sim-p-' + j + '-val"></output></div>' +
-      '<input type="range" id="sim-p-' + j + '" min="0" max="100" step="1" aria-label="Participation des ' + x.nom + '">' +
-      '<span class="reel">Participation réelle : ' + pct(x.participation) + '</span>' +
-      '<label for="sim-c-' + j + '">Vote comme <select id="sim-c-' + j + '">' +
-        t.map((y, k) => '<option value="' + k + '">' + (k === j ? 'elle-même' : 'les ' + y.nom) + '</option>').join('') +
-      '</select></label>' +
+  document.getElementById('scenarios').innerHTML = SCENARIOS.map(s => '<button type="button" data-scenario="' + s.id + '">' + s.nom + '</button>').join('');
+  document.getElementById('sim-ages').innerHTML = t.map((x, j) =>
+    '<div class="age" id="age-' + j + '">' +
+      '<label class="tranche" for="sim-p-' + j + '">' + x.nom.replace(' et plus', '&nbsp;et&nbsp;+') + '</label>' +
+      '<div class="curseur"><span class="repere" style="left:calc(7px + (100% - 14px) * ' + x.participation + ')"></span>' +
+        '<input type="range" id="sim-p-' + j + '" min="0" max="100" step="1" aria-label="Participation des ' + x.nom + '"></div>' +
+      '<output id="sim-p-' + j + '-val" for="sim-p-' + j + '"></output>' +
+      '<div class="sous"><span>réel ' + pct(x.participation, 0) + '</span>' +
+        '<select id="sim-c-' + j + '" aria-label="Choix de vote des ' + x.nom + '">' +
+          t.map((y, k) => '<option value="' + k + '">' + (k === j ? 'vote comme elle-même' : 'vote comme les ' + y.nom) + '</option>').join('') +
+        '</select></div>' +
     '</div>').join('');
   document.querySelectorAll('[data-scenario]').forEach(b => b.addEventListener('click', () => { appliquerScenario(b.dataset.scenario); rendreSimu(); }));
   t.forEach((_, j) => {
@@ -762,107 +495,214 @@ function construireReglagesSimu() {
 function rendreSimu() {
   const presidentielle = sim.election === '2022';
   const t = tranchesReelles(sim.election);
+  const inscrits = somme(t, x => x.inscrits);
   const reel = scores(sim.election, t.map(x => x.participation), t.map((_, j) => j));
   const simule = scores(sim.election, sim.participation, sim.comme);
   const ordre = [...simule.candidats].sort((a, b) => b.score - a.score);
-  const ordreReel = [...reel.candidats].sort((a, b) => b.score - a.score);
-  const scoreReel = Object.fromEntries(reel.candidats.map(c => [c.id, c.officiel]));
-  const inchange = sim.scenario === 'reel';
-
-  document.getElementById('annee-titre').textContent = sim.election;
-  document.getElementById('sim-sur-titre').textContent = 'Simulateur · ' + (presidentielle ? 'Présidentielle 2022 · 1er tour' : 'Européennes 2024') +
-    (sim.scenario ? ' · ' + SCENARIOS.find(s => s.id === sim.scenario).nom : ' · Scénario personnalisé');
-
-  // Titre et chapô selon ce qui change.
-  let titre, chapo;
+  const ordreReel = [...reel.candidats].sort((a, b) => b.officiel - a.officiel);
+  const officiel = Object.fromEntries(reel.candidats.map(c => [c.id, c.officiel]));
+  const scenario = SCENARIOS.find(s => s.id === sim.scenario);
   const [a, b, c] = ordre;
-  const nomCourt = x => x.nom.replace('Autres listes', 'les autres listes');
-  if (inchange) {
-    titre = presidentielle ? 'Et si les générations avaient voté autrement en 2022 ?' : 'Et si les générations avaient voté autrement aux européennes ?';
-    chapo = 'Choisissez un scénario ou réglez, pour chaque tranche d’âge, la participation et les choix de vote. Les scores sont recalculés à partir des votes réels de chaque âge. Au départ, ils reproduisent le résultat officiel.';
+  const nom = x => x.nom.replace('Autres listes', 'les autres listes');
+
+  document.getElementById('sim-label').textContent = (presidentielle ? 'Présidentielle 2022 · 1er tour' : 'Européennes 2024') + ' · ' + (scenario ? scenario.nom : 'Scénario personnalisé');
+
+  let titre, chapo;
+  if (sim.scenario === 'reel') {
+    titre = presidentielle ? a.nom + ' et ' + b.nom + ' qualifiés, ' + c.nom + ' à ' + ecartPts(b.score - c.score) : a.nom + ' en tête, loin devant ' + b.nom;
+    chapo = 'Voici le résultat officiel. Choisissez un scénario ci-dessus, ou réglez chaque tranche d’âge, pour le transformer.';
   } else if (presidentielle) {
-    const memesQualifies = [a.id, b.id].sort().join() === [ordreReel[0].id, ordreReel[1].id].sort().join();
-    titre = memesQualifies
-      ? 'Le second tour aurait toujours opposé ' + a.nom + ' à ' + b.nom
-      : 'Le second tour aurait opposé ' + a.nom + ' à ' + b.nom;
-    chapo = a.nom + ' obtiendrait ' + pct(a.score) + ', ' + b.nom + ' ' + pct(b.score) + ' et ' + c.nom + ' ' + pct(c.score) +
-      '. L’écart entre le deuxième et le troisième serait de ' + ecartPts(b.score - c.score) +
-      ', contre ' + ecartPts(ordreReel[1].score - ordreReel[2].score) + ' en réalité.';
+    const memes = [a.id, b.id].sort().join() === [ordreReel[0].id, ordreReel[1].id].sort().join();
+    titre = (memes ? 'Le second tour aurait toujours opposé ' : 'Le second tour aurait opposé ') + a.nom + ' à ' + b.nom;
+    chapo = c.nom + ' serait troisième, à ' + ecartPts(b.score - c.score) + ' de la qualification, contre ' +
+      ecartPts(officiel[ordreReel[1].id] - officiel[ordreReel[2].id]) + ' en réalité.';
   } else {
-    titre = a.id === ordreReel[0].id
-      ? a.nom + ' resterait en tête avec ' + pct(a.score)
-      : a.nom + ' arriverait en tête avec ' + pct(a.score);
-    chapo = 'Viendraient ensuite ' + nomCourt(b) + ' (' + pct(b.score) + ') et ' + nomCourt(c) + ' (' + pct(c.score) + '). ' +
-      'Participation simulée : ' + pct(simule.total / t.reduce((s, x) => s + x.inscrits, 0)) + ' des inscrits, contre ' + pct(reel.total / t.reduce((s, x) => s + x.inscrits, 0)) + ' en réalité.';
+    titre = a.nom + (a.id === ordreReel[0].id ? ' resterait en tête avec ' : ' arriverait en tête avec ') + pct(a.score);
+    chapo = 'Viendraient ensuite ' + nom(b) + ' (' + pct(b.score) + ') et ' + nom(c) + ' (' + pct(c.score) + ').';
   }
   document.getElementById('sim-titre').textContent = titre;
   document.getElementById('sim-chapo').textContent = chapo;
 
-  // Barres de résultats, dans l'ordre du score simulé.
-  const max = Math.max(...ordre.map(x => Math.max(x.score, scoreReel[x.id]))) * 1.05;
-  document.getElementById('sim-resultats').innerHTML = ordre.map((x, i) => {
-    const ecart = x.score - scoreReel[x.id];
-    return '<div class="res-ligne' + (presidentielle && i < 2 ? ' qualifie' : '') + '">' +
-      '<span class="qui"><b>' + x.nom + '</b><span>' + x.etiquette + '</span></span>' +
-      '<div class="piste"><div style="width:' + (x.score / max * 100) + '%;background:var(--c-' + COULEURS[x.id] + ')"></div>' +
-        '<span class="reel-trait" style="left:calc(' + (scoreReel[x.id] / max * 100) + '% - 1px)" title="Résultat officiel"></span></div>' +
-      '<span class="chiffres"><b>' + pct(x.score) + '</b><span class="variation neutre">' + fleche(ecart) + pts(ecart) + '</span></span>' +
-      '</div>';
+  // Tête de course : les deux qualifiés en 2022, le podium en 2024.
+  const tete = ordre.slice(0, presidentielle ? 2 : 3);
+  const rang = i => presidentielle ? (i === 0 ? '1er · qualifié' : '2e · qualifié') : ['1re place', '2e place', '3e place'][i];
+  const zoneTete = document.getElementById('sim-tete');
+  zoneTete.className = 'tete ' + (presidentielle ? 'deux' : 'trois');
+  zoneTete.innerHTML = tete.map((x, i) =>
+    '<div class="place" style="--couleur:var(--c-' + COULEURS[x.id] + ')">' +
+      '<span class="rang">' + rang(i) + '</span>' +
+      '<span class="nom">' + x.nom + '</span><span class="parti">' + x.etiquette + '</span>' +
+      '<span class="score">' + pct(x.score) + '</span>' +
+      '<span class="delta">officiel ' + pct(officiel[x.id]) + ' · ' + pts(x.score - officiel[x.id]) + '</span>' +
+    '</div>').join('');
+
+  // Liste complète, dans l'ordre du score simulé.
+  const max = Math.max(...ordre.map(x => Math.max(x.score, officiel[x.id]))) * 1.04;
+  document.getElementById('sim-liste').innerHTML = ordre.map(x => {
+    const ecart = x.score - officiel[x.id];
+    return '<div class="ligne-res">' +
+      '<span class="qui" title="' + x.nom + ' · ' + x.etiquette + '">' + x.nom + ' <small>' + x.etiquette + '</small></span>' +
+      '<div class="piste"><div class="rempli" style="width:' + (x.score / max * 100) + '%;background:var(--c-' + COULEURS[x.id] + ')"></div>' +
+        '<span class="officiel" style="left:' + (officiel[x.id] / max * 100) + '%"></span></div>' +
+      '<span class="val">' + pct(x.score) + '</span>' +
+      '<span class="ecart' + (Math.abs(ecart) < 0.0005 ? ' nul' : '') + '">' + pts(ecart) + '</span>' +
+    '</div>';
   }).join('');
 
-  // Tableau des tranches d'âge.
-  document.getElementById('sim-tableau').innerHTML =
-    '<thead><tr><th>Tranche d’âge</th><th>Inscrits</th><th>Participation réelle</th><th>Participation simulée</th><th>Vote comme</th><th>Part des votants réelle</th><th>Part des votants simulée</th></tr></thead><tbody>' +
-    t.map((x, j) => '<tr><td>' + x.nom + '</td><td>' + entier(x.inscrits) + '</td><td>' + pct(x.participation) + '</td><td>' + pct(sim.participation[j]) +
-      '</td><td style="font-family:var(--font-sans)">' + (sim.comme[j] === j ? 'elle-même' : 'les ' + t[sim.comme[j]].nom) + '</td><td>' + pct(reel.votants[j] / reel.total) +
-      '</td><td>' + (simule.total ? pct(simule.votants[j] / simule.total) : '–') + '</td></tr>').join('') +
-    '<tr class="total"><td>Ensemble</td><td>' + entier(t.reduce((s, x) => s + x.inscrits, 0)) + '</td><td>' + pct(reel.total / t.reduce((s, x) => s + x.inscrits, 0)) +
-    '</td><td>' + pct(simule.total / t.reduce((s, x) => s + x.inscrits, 0)) + '</td><td></td><td>100,0' + NBSP + '%</td><td>100,0' + NBSP + '%</td></tr></tbody>';
-
-  // Réglages synchronisés avec l'état.
-  t.forEach((_, j) => {
+  t.forEach((x, j) => {
     document.getElementById('sim-p-' + j).value = Math.round(sim.participation[j] * 100);
     document.getElementById('sim-p-' + j + '-val').textContent = pct(sim.participation[j], 0);
     document.getElementById('sim-c-' + j).value = sim.comme[j];
+    document.getElementById('age-' + j).classList.toggle('modifiee', Math.abs(sim.participation[j] - x.participation) > 0.004 || sim.comme[j] !== j);
   });
-  document.querySelectorAll('[data-scenario]').forEach(b => b.setAttribute('aria-pressed', b.dataset.scenario === sim.scenario));
-  document.querySelectorAll('[data-sim-election]').forEach(b => b.setAttribute('aria-pressed', b.dataset.simElection === sim.election));
+  document.getElementById('sim-total').textContent = pct(simule.total / inscrits);
+  document.getElementById('sim-total-reel').textContent = '· réelle ' + pct(reel.total / inscrits);
+  document.querySelectorAll('[data-scenario]').forEach(btn => btn.setAttribute('aria-pressed', btn.dataset.scenario === sim.scenario));
+  document.querySelectorAll('[data-sim-election]').forEach(btn => btn.setAttribute('aria-pressed', btn.dataset.simElection === sim.election));
 }
 
-/* ───────────── Navigation et interactions ───────────── */
+/* ───────────── Ouverture : deux chiffres qui posent le sujet ───────────── */
 
-function rendre() {
-  const poids = etat.vue === 'poids';
-  document.getElementById('vue-poids').hidden = !poids;
-  document.getElementById('vue-simu').hidden = poids;
-  document.getElementById('reglages-poids').hidden = !poids;
-  document.getElementById('reglages-simu').hidden = poids;
-  document.querySelectorAll('.vues button').forEach(b => b.setAttribute('aria-selected', b.dataset.vue === etat.vue));
-  document.getElementById('sous-titre').textContent = poids ? 'Présidentielle et européennes · Qui pèse dans l’urne' : 'Simulateur · Et s’ils avaient voté autrement';
-  document.getElementById('source').textContent = SOURCES[etat.vue];
-  if (poids) rendrePoids(); else rendreSimu();
+function rendreOuverture() {
+  const t = tranchesReelles('2024');
+  const listes = window.DONNEES.simulation['2024'].candidats;
+  const aubry = listes.find(c => c.id === 'aubry'), hayer = listes.find(c => c.id === 'hayer');
+  document.getElementById('chiffres-cles').innerHTML =
+    '<div><b>' + pct(t[5].participation, 0) + '</b><span>des 70 ans et plus ont voté aux européennes de 2024, contre ' + pct(t[1].participation, 0) + ' des 25-34 ans.</span></div>' +
+    '<div><b>' + pct(aubry.ipsos[0], 0) + '</b><span>des 18-24 ans votants ont choisi Manon Aubry, contre ' + pct(aubry.ipsos[5], 0) + ' des 70 ans et plus. Pour Valérie Hayer, c’est l’inverse : ' + pct(hayer.ipsos[0], 0) + ' et ' + pct(hayer.ipsos[5], 0) + '.</span></div>';
 }
 
-document.querySelectorAll('[data-election]').forEach(b => b.addEventListener('click', () => { etat.election = b.dataset.election; rendre(); }));
-document.querySelectorAll('[data-tour]').forEach(b => b.addEventListener('click', () => { etat.tour = b.dataset.tour; rendre(); }));
-const curseur = document.getElementById('bonus');
-curseur.addEventListener('input', () => { etat.bonus = Number(curseur.value); rendre(); });
-document.getElementById('reinitialiser').addEventListener('click', () => { curseur.value = 0; etat.bonus = 0; rendre(); });
-document.querySelectorAll('.vues button').forEach(b => b.addEventListener('click', () => { etat.vue = b.dataset.vue; rendre(); }));
-document.querySelectorAll('[data-sim-election]').forEach(b => b.addEventListener('click', () => {
-  sim.election = b.dataset.simElection;
-  construireReglagesSimu();
+/* ───────────── Poids des générations ───────────── */
+
+const poids = { election: '2022' };
+const generationDe = naissance => GENERATIONS.find(g => naissance >= g.debut && naissance <= g.fin);
+
+function calculer(election) {
+  const annees = window.DONNEES.elections[election].map(d => {
+    const inscrits = d.population * d.inscription;
+    return { ...d, inscrits, votants: inscrits * d.t1, taux: d.t1, generation: generationDe(d.naissance) };
+  });
+  const total = { population: somme(annees, a => a.population), inscrits: somme(annees, a => a.inscrits), votants: somme(annees, a => a.votants) };
+  const generations = GENERATIONS.map(g => {
+    const m = annees.filter(a => a.generation === g);
+    const population = somme(m, a => a.population), inscrits = somme(m, a => a.inscrits), votants = somme(m, a => a.votants);
+    return { ...g, population, inscrits, votants, agesMin: Math.min(...m.map(a => a.age)), agesMax: Math.max(...m.map(a => a.age)),
+      partPopulation: population / total.population, partVotants: votants / total.votants, participation: votants / inscrits };
+  });
+  return { annees, generations, total };
+}
+
+function rendrePoids() {
+  const r = calculer(poids.election);
+  const nomElection = { '2022': 'au 1er tour de la présidentielle 2022', '2024': 'aux européennes de 2024', '2027': 'au 1er tour de la présidentielle 2027' }[poids.election];
+  const premiere = [...r.generations].sort((x, y) => y.partVotants - x.partVotants)[0];
+  const pluriel = premiere.sujet.startsWith('les ');
+  const verbe = poids.election === '2027' ? (pluriel ? 'pèseraient' : 'pèserait') : (pluriel ? 'ont pesé' : 'a pesé');
+  const sujet = premiere.sujet.charAt(0).toUpperCase() + premiere.sujet.slice(1);
+  document.getElementById('poids-titre').textContent = sujet + ' ' + verbe + ' ' + pct(premiere.partVotants, 0) + ' des votants ' + nomElection;
+  const boomers = r.generations[1], y = r.generations[3];
+  document.getElementById('poids-chapo').textContent =
+    'Sur environ ' + millions(r.total.votants) + ' de votants estimés, les baby-boomers représentent ' + pct(boomers.partPopulation) + ' des adultes mais ' + pct(boomers.partVotants) +
+    ' des bulletins. La génération Y, presque aussi nombreuse (' + pct(y.partPopulation) + ' des adultes), n’en fournit que ' + pct(y.partVotants) + '.';
+
+  document.getElementById('generations').innerHTML = r.generations.map(g => {
+    const ecart = g.partVotants - g.partPopulation;
+    return '<div class="generation">' +
+      '<span class="nom"><span class="pastille" style="background:var(--' + g.id + ')"></span>' + g.nom + '</span>' +
+      '<span class="annees">' + g.agesMin + '-' + g.agesMax + NBSP + 'ans au scrutin</span>' +
+      '<b>' + pct(g.partVotants) + '</b>' +
+      '<span class="detail">des votants, soit <span class="' + (ecart >= 0 ? 'plus' : 'moins') + '">' + pts(ecart) + '</span> par rapport à son poids parmi les adultes</span>' +
+    '</div>';
+  }).join('');
+
+  rendreGraphique(r);
+
+  const t = r.total;
+  document.getElementById('tableau').innerHTML =
+    '<thead><tr><th>Génération</th><th>Âge au scrutin</th><th>Adultes</th><th>Inscrits</th><th>Participation</th><th>Votants</th><th>Part des adultes</th><th>Part des votants</th></tr></thead><tbody>' +
+    r.generations.map(g => '<tr><td>' + g.nom + '</td><td>' + g.agesMin + '-' + g.agesMax + '</td><td>' + entier(g.population) + '</td><td>' + entier(g.inscrits) +
+      '</td><td>' + pct(g.participation) + '</td><td>' + entier(g.votants) + '</td><td>' + pct(g.partPopulation) + '</td><td>' + pct(g.partVotants) + '</td></tr>').join('') +
+    '<tr class="total"><td>Ensemble</td><td class="texte">18 ans et plus</td><td>' + entier(t.population) + '</td><td>' + entier(t.inscrits) + '</td><td>' + pct(t.votants / t.inscrits) +
+    '</td><td>' + entier(t.votants) + '</td><td>100,0' + NBSP + '%</td><td>100,0' + NBSP + '%</td></tr></tbody>';
+  document.querySelectorAll('[data-election]').forEach(btn => btn.setAttribute('aria-pressed', btn.dataset.election === poids.election));
+}
+
+// Colonnes empilées : une colonne par année de naissance.
+const DEBUT = 1920, FIN = 2008;
+const L = 900, H = 320, M = { haut: 28, droite: 10, bas: 34, gauche: 46 };
+const YMAX = 1000000;
+
+function rendreGraphique(r) {
+  const largeur = (L - M.gauche - M.droite) / (FIN - DEBUT + 1);
+  const x = annee => M.gauche + (annee - DEBUT) * largeur;
+  const y = v => M.haut + (H - M.haut - M.bas) * (1 - v / YMAX);
+  let svg = '<svg viewBox="0 0 ' + L + ' ' + H + '" role="img" aria-label="Population, inscrits et votants par année de naissance">';
+  for (let v = 0; v <= YMAX; v += 200000) {
+    svg += '<line x1="' + M.gauche + '" x2="' + (L - M.droite) + '" y1="' + y(v) + '" y2="' + y(v) + '" stroke="var(--border)"/>';
+    svg += '<text class="valeur-axe" x="' + (M.gauche - 6) + '" y="' + (y(v) + 3) + '" text-anchor="end">' + (v === 0 ? '0' : (v / 1000) + NBSP + 'k') + '</text>';
+  }
+  GENERATIONS.forEach(g => {
+    const d = Math.max(g.debut, DEBUT), f = Math.min(g.fin, FIN);
+    if (g.debut > DEBUT) svg += '<line x1="' + x(g.debut) + '" x2="' + x(g.debut) + '" y1="' + (M.haut - 16) + '" y2="' + y(0) + '" stroke="var(--border-mid)" stroke-dasharray="2 3"/>';
+    svg += '<text class="nom-gen" x="' + ((x(d) + x(f + 1)) / 2) + '" y="' + (M.haut - 8) + '" text-anchor="middle">' + g.nom.replace('Génération ', 'Gén. ') + '</text>';
+  });
+  r.annees.forEach(a => {
+    if (a.naissance < DEBUT) return;
+    const x0 = x(a.naissance) + 1, w = Math.max(1, largeur - 2);
+    let cumul = 0;
+    [[a.votants, 'var(--' + a.generation.id + ')'], [a.inscrits - a.votants, 'var(--abstention)'], [a.population - a.inscrits, 'var(--non-inscrits)']].forEach(([v, couleur]) => {
+      svg += '<rect x="' + x0 + '" y="' + y(cumul + v) + '" width="' + w + '" height="' + Math.max(0, y(cumul) - y(cumul + v)) + '" fill="' + couleur + '"/>';
+      cumul += v;
+    });
+    svg += '<rect class="zone" data-annee="' + a.naissance + '" x="' + x(a.naissance) + '" y="' + M.haut + '" width="' + largeur + '" height="' + (H - M.haut - M.bas) + '" fill="transparent"/>';
+  });
+  svg += '<line x1="' + M.gauche + '" x2="' + (L - M.droite) + '" y1="' + y(0) + '" y2="' + y(0) + '" stroke="var(--border-dark)"/>';
+  for (let annee = DEBUT; annee <= FIN; annee += 10) {
+    svg += '<text class="valeur-axe" x="' + (x(annee) + largeur / 2) + '" y="' + (H - M.bas + 16) + '" text-anchor="middle">' + annee + '</text>';
+  }
+  svg += '<text x="' + (L - M.droite) + '" y="' + (H - 4) + '" text-anchor="end">année de naissance</text></svg>';
+  document.getElementById('graphique').innerHTML = svg;
+
+  const bulle = document.getElementById('infobulle'), figure = document.getElementById('figure');
+  const parAnnee = Object.fromEntries(r.annees.map(a => [a.naissance, a]));
+  document.querySelectorAll('#graphique .zone').forEach(zone => {
+    const montrer = () => {
+      const a = parAnnee[zone.dataset.annee];
+      bulle.innerHTML =
+        '<div class="titre"><span class="pastille" style="background:var(--' + a.generation.id + ')"></span>Nés en ' + a.naissance + ' · ' + a.age + NBSP + 'ans</div>' +
+        '<div class="ligne"><span>Adultes</span><b>' + entier(a.population) + '</b></div>' +
+        '<div class="ligne"><span>Inscrits</span><b>' + entier(a.inscrits) + '</b></div>' +
+        '<div class="ligne"><span>Votants estimés</span><b>' + entier(a.votants) + '</b></div>' +
+        '<div class="ligne"><span>Participation</span><b>' + pct(a.taux) + '</b></div>';
+      bulle.hidden = false;
+      const cadre = figure.getBoundingClientRect(), z = zone.getBoundingClientRect();
+      let gauche = z.left - cadre.left + z.width + 10;
+      if (gauche + bulle.offsetWidth > cadre.width - 8) gauche = z.left - cadre.left - bulle.offsetWidth - 10;
+      bulle.style.left = Math.max(8, gauche) + 'px';
+      bulle.style.top = '56px';
+      zone.setAttribute('fill', 'var(--text)'); zone.setAttribute('fill-opacity', '0.06');
+    };
+    const cacher = () => { bulle.hidden = true; zone.setAttribute('fill', 'transparent'); };
+    zone.addEventListener('mouseenter', montrer);
+    zone.addEventListener('mouseleave', cacher);
+    zone.addEventListener('touchstart', montrer, { passive: true });
+  });
+}
+
+/* ───────────── Interactions ───────────── */
+
+document.querySelectorAll('[data-sim-election]').forEach(btn => btn.addEventListener('click', () => {
+  sim.election = btn.dataset.simElection;
+  construireReglages();
   appliquerScenario(sim.scenario || 'reel');
-  rendre();
+  rendreSimu();
 }));
-document.querySelectorAll('.onglets button').forEach(b => b.addEventListener('click', () => {
-  document.getElementById('app').dataset.onglet = b.dataset.onglet;
-  document.querySelectorAll('.onglets button').forEach(o => o.setAttribute('aria-selected', o === b));
-}));
+document.getElementById('sim-reinit').addEventListener('click', () => { appliquerScenario('reel'); rendreSimu(); });
+document.querySelectorAll('[data-election]').forEach(btn => btn.addEventListener('click', () => { poids.election = btn.dataset.election; rendrePoids(); }));
 
-// Un lien terminé par #simulateur ouvre directement le simulateur.
-if (location.hash === '#simulateur') etat.vue = 'simu';
-construireReglagesSimu();
+rendreOuverture();
+construireReglages();
 appliquerScenario('reel');
-rendre();
+rendreSimu();
+rendrePoids();
 </script>
