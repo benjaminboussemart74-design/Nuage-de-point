@@ -1,6 +1,7 @@
 """
 Estime le poids de chaque génération (année de naissance) dans les votants
-des présidentielles 2022 (observée) et 2027 (projetée).
+de la présidentielle 2022, des européennes 2024 et de la présidentielle 2027 (projetée),
+et prépare le simulateur de scores selon la participation par âge.
 
 Pour chaque année de naissance :
     votants = population × taux d'inscription × taux de participation
@@ -12,11 +13,19 @@ Sources (INSEE, téléchargées automatiquement si absentes) :
 3. Participation par âge à la présidentielle 2022 (enquête sur la participation électorale) :
    Insee Première n° 1928 (au moins un tour, par tranche de 5 ans)
    et n° 1929 (chaque tour, pour les 18-29, 30-64 et 65 ans ou plus).
+4. Européennes 2024 : inscrits par âge (Insee Focus n° 328, 8 mai 2024).
+
+Sources Ipsos, transcrites à la main dans data/cohortes/ :
+5. vote_par_age_ipsos.csv : vote par tranche d'âge (Ipsos, « Sociologie des électorats »,
+   1er tour de la présidentielle 2022 et européennes 2024), avec les résultats officiels.
+6. participation_par_age_ipsos.csv : participation par tranche d'âge, utilisée pour 2024,
+   faute d'enquête de l'INSEE sur ce scrutin.
 
 Utilisation :
     python scripts/construire_cohortes_electorales.py
 """
 
+import csv
 import json
 import urllib.request
 from pathlib import Path
@@ -25,7 +34,10 @@ import openpyxl
 
 RACINE = Path(__file__).resolve().parent.parent
 DOSSIER_BRUT = RACINE / "data" / "brut" / "telechargements" / "insee_cohortes"
-FICHIER_SORTIE = RACINE / "data" / "cohortes" / "cohortes_electorales.json"
+DOSSIER_COHORTES = RACINE / "data" / "cohortes"
+FICHIER_SORTIE = DOSSIER_COHORTES / "cohortes_electorales.json"
+FICHIER_VOTE_IPSOS = DOSSIER_COHORTES / "vote_par_age_ipsos.csv"
+FICHIER_PARTICIPATION_IPSOS = DOSSIER_COHORTES / "participation_par_age_ipsos.csv"
 # Copie des mêmes données, chargée directement par la page de l'application.
 FICHIER_APPLICATION = RACINE / "cohortes-presidentielle" / "donnees.js"
 
@@ -33,6 +45,7 @@ URLS = {
     "pop3.xlsx": "https://www.insee.fr/fr/statistiques/fichier/8999013/3_Pop1janv_age.xlsx",
     "if264.xlsx": "https://www.insee.fr/fr/statistiques/fichier/6322895/if264.xlsx",
     "if378.xlsx": "https://www.insee.fr/fr/statistiques/fichier/8888278/if378.xlsx",
+    "if328.xlsx": "https://www.insee.fr/fr/statistiques/fichier/8192479/IF328.xlsx",
     "ip1928.xlsx": "https://www.insee.fr/fr/statistiques/fichier/6658145/ip1928.xlsx",
     "ip1929.xlsx": "https://www.insee.fr/fr/statistiques/fichier/6658143/ip1929.xlsx",
 }
@@ -42,8 +55,11 @@ TRANCHES = [(18, 24), (25, 29), (30, 34), (35, 39), (40, 44), (45, 49), (50, 54)
             (55, 59), (60, 64), (65, 69), (70, 74), (75, 79), (80, 84), (85, 89), (90, 200)]
 # Grandes tranches pour lesquelles l'INSEE publie la participation à chaque tour.
 GRANDES_TRANCHES = [(18, 29), (30, 64), (65, 200)]
-# Tranches des inscrits publiées pour 2026.
-TRANCHES_2026 = [(18, 24), (25, 39), (40, 54), (55, 64), (65, 79), (80, 200)]
+# Tranches des inscrits publiées pour 2024 et 2026.
+TRANCHES_REU = [(18, 24), (25, 39), (40, 54), (55, 64), (65, 79), (80, 200)]
+# Tranches d'âge des enquêtes Ipsos.
+TRANCHES_IPSOS = [(18, 24), (25, 34), (35, 49), (50, 59), (60, 69), (70, 200)]
+COLONNES_IPSOS = ["18-24", "25-34", "35-49", "50-59", "60-69", "70+"]
 
 
 def telecharger():
@@ -122,29 +138,100 @@ def participation_par_tour(pop, inscription):
     return resultat
 
 
+def inscription_recalee(pop, fichier, pop22, inscription22):
+    """
+    Taux d'inscription par âge pour une année où le REU n'est publié que sur six tranches :
+    on garde la forme de 2022 à l'intérieur de chaque tranche et on la recale sur le niveau observé.
+    """
+    inscrits = valeurs_par_tranche(fichier, "Figure 2a", 3)[:len(TRANCHES_REU)]
+    niveau = taux_inscription(pop, inscrits, TRANCHES_REU)
+    niveau22 = {T: sum(pop22[a][1] * inscription22[tranche_de(a, TRANCHES)] for a in pop22 if T[0] <= a <= T[1])
+                / sum(pop22[a][1] for a in pop22 if T[0] <= a <= T[1]) for T in TRANCHES_REU}
+
+    def taux(age):
+        T = tranche_de(age, TRANCHES_REU)
+        return min(1.0, inscription22[tranche_de(age, TRANCHES)] * niveau[T] / niveau22[T])
+    return taux
+
+
+def generations(pop, inscription, participation):
+    """Une ligne par année de naissance des adultes : population, part inscrite et participation."""
+    resultat = []
+    for age in sorted(pop, reverse=True):
+        if age < 18:
+            continue
+        naissance, effectif = pop[age]
+        ligne = {"naissance": naissance, "age": age, "population": round(effectif),
+                 "inscription": round(inscription(age), 4)}
+        for tour, taux in participation.items():
+            ligne[tour] = round(taux(age), 4)
+        resultat.append(ligne)
+    return resultat
+
+
+def participation_europeennes(pop, inscription, participation22):
+    """
+    Participation par âge aux européennes 2024. Ipsos donne le niveau dans six tranches ;
+    la forme à l'intérieur de chaque tranche reprend celle du 1er tour de 2022 (INSEE).
+    """
+    with open(FICHIER_PARTICIPATION_IPSOS, encoding="utf-8") as f:
+        ipsos = next(l for l in csv.DictReader(f, delimiter=";") if l["election"] == "2024")
+    forme = lambda a: participation22["t1"][tranche_de(a, TRANCHES)]
+    inscrits = lambda a: pop[a][1] * inscription(a)
+    facteurs = {}
+    for T, colonne in zip(TRANCHES_IPSOS, COLONNES_IPSOS):
+        ages = [a for a in pop if T[0] <= a <= T[1]]
+        moyenne = sum(forme(a) * inscrits(a) for a in ages) / sum(inscrits(a) for a in ages)
+        facteurs[T] = float(ipsos[colonne]) / 100 / moyenne
+    return lambda a: min(1.0, forme(a) * facteurs[tranche_de(a, TRANCHES_IPSOS)])
+
+
+def simulation(election, lignes_election):
+    """
+    Vote par tranche d'âge pour le simulateur de scores.
+
+    Les pourcentages d'Ipsos sont arrondis et pondérés sur son propre échantillon. On les ajuste
+    (méthode du calage itératif) pour que, avec les votants estimés de chaque tranche, on retrouve
+    exactement les résultats officiels, tout en gardant la composition du vote de chaque tranche.
+    """
+    with open(FICHIER_VOTE_IPSOS, encoding="utf-8") as f:
+        candidats = [l for l in csv.DictReader(f, delimiter=";") if l["election"] == election]
+    votants = [sum(l["population"] * l["inscription"] * l["t1"] for l in lignes_election if T[0] <= l["age"] <= T[1])
+               for T in TRANCHES_IPSOS]
+    total = sum(votants)
+    officiel = [float(c["officiel"]) for c in candidats]
+    officiel = [o / sum(officiel) for o in officiel]
+    # Matrice des voix : une ligne par candidat, une colonne par tranche d'âge.
+    voix = [[max(float(c[col]), 0.2) / 100 * v for col, v in zip(COLONNES_IPSOS, votants)] for c in candidats]
+    for _ in range(200):
+        for i, ligne in enumerate(voix):
+            facteur = officiel[i] * total / sum(ligne)
+            voix[i] = [x * facteur for x in ligne]
+        for j, v in enumerate(votants):
+            facteur = v / sum(ligne[j] for ligne in voix)
+            for ligne in voix:
+                ligne[j] *= facteur
+    return {
+        "tranches": ["18-24 ans", "25-34 ans", "35-49 ans", "50-59 ans", "60-69 ans", "70 ans et plus"],
+        "bornes": [[T[0], T[1]] for T in TRANCHES_IPSOS],
+        "candidats": [{
+            "id": c["id"], "nom": c["candidat"], "etiquette": c["etiquette"],
+            "officiel": round(o, 5),
+            "ipsos": [float(c[col]) / 100 for col in COLONNES_IPSOS],
+            "parTranche": [round(voix[i][j] / votants[j], 5) for j in range(len(votants))],
+        } for i, (c, o) in enumerate(zip(candidats, officiel))],
+    }
+
+
 def main():
     telecharger()
 
-    pop22, pop25, pop26 = population(2022), population(2025), population(2026)
+    pop22, pop24, pop25, pop26 = population(2022), population(2024), population(2025), population(2026)
 
     # Inscription 2022 : directement par tranche de 5 ans.
     inscrits22 = valeurs_par_tranche("if264.xlsx", "Figure 2a", 3)[:len(TRANCHES)]
     inscription22 = taux_inscription(pop22, inscrits22, TRANCHES)
-
-    # Inscription 2026 : six tranches seulement. On garde la forme de 2022 à l'intérieur
-    # de chacune et on la recale sur le niveau observé en 2026.
-    inscrits26 = valeurs_par_tranche("if378.xlsx", "Figure 2a", 3)[:len(TRANCHES_2026)]
-    inscription26_large = taux_inscription(pop26, inscrits26, TRANCHES_2026)
-    inscrits22_large = {T: sum(pop22[a][1] * inscription22[tranche_de(a, TRANCHES)]
-                               for a in pop22 if T[0] <= a <= T[1]) for T in TRANCHES_2026}
-    pop22_large = {T: sum(pop22[a][1] for a in pop22 if T[0] <= a <= T[1]) for T in TRANCHES_2026}
-
-    def inscription27(age):
-        T = tranche_de(age, TRANCHES_2026)
-        return min(1.0, inscription22[tranche_de(age, TRANCHES)]
-                   * inscription26_large[T] / (inscrits22_large[T] / pop22_large[T]))
-
-    participation = participation_par_tour(pop22, inscription22)
+    participation22 = participation_par_tour(pop22, inscription22)
 
     # Projection au 1er janvier 2027 : chaque génération vieillit d'un an et évolue
     # comme elle l'a fait entre 2025 et 2026 (décès et migrations).
@@ -157,27 +244,21 @@ def main():
     # Les « 100 ans ou plus » de 2026 restent dans la dernière ligne avec ceux qui les rejoignent.
     pop27[age_max] = (pop26[age_max - 1][0], pop27[age_max][1] + pop26[age_max][1] * pop26[age_max][1] / pop25[age_max][1])
 
-    def generations(pop, inscription):
-        resultat = []
-        for age in sorted(pop, reverse=True):
-            if age < 18:
-                continue
-            naissance, effectif = pop[age]
-            tranche = tranche_de(age, TRANCHES)
-            resultat.append({
-                "naissance": naissance,
-                "age": age,
-                "population": round(effectif),
-                "inscription": round(inscription(age), 4),
-                "t1": round(participation["t1"][tranche], 4),
-                "t2": round(participation["t2"][tranche], 4),
-            })
-        return resultat
+    inscription24 = inscription_recalee(pop24, "if328.xlsx", pop22, inscription22)
+    inscription27 = inscription_recalee(pop26, "if378.xlsx", pop22, inscription22)
 
-    sortie = {
-        "2022": generations(pop22, lambda a: min(1.0, inscription22[tranche_de(a, TRANCHES)])),
-        "2027": generations(pop27, inscription27),
+    # À âge égal, on vote en 2027 comme en 2022.
+    par_tour = {tour: (lambda t: lambda a: t[tranche_de(a, TRANCHES)])(taux) for tour, taux in participation22.items()}
+    elections = {
+        "2022": generations(pop22, lambda a: min(1.0, inscription22[tranche_de(a, TRANCHES)]), par_tour),
+        "2024": generations(pop24, inscription24, {"t1": participation_europeennes(pop24, inscription24, participation22)}),
+        "2027": generations(pop27, inscription27, par_tour),
     }
+    sortie = {
+        "elections": elections,
+        "simulation": {"2022": simulation("2022", elections["2022"]), "2024": simulation("2024", elections["2024"])},
+    }
+
     FICHIER_SORTIE.parent.mkdir(parents=True, exist_ok=True)
     FICHIER_SORTIE.write_text(json.dumps(sortie, ensure_ascii=False, indent=1), encoding="utf-8")
     FICHIER_APPLICATION.parent.mkdir(parents=True, exist_ok=True)
@@ -186,7 +267,7 @@ def main():
         f"window.DONNEES = {json.dumps(sortie, ensure_ascii=False, separators=(',', ':'))};\n",
         encoding="utf-8")
 
-    for annee, gens in sortie.items():
+    for annee, gens in elections.items():
         inscrits = sum(g["population"] * g["inscription"] for g in gens)
         votants = sum(g["population"] * g["inscription"] * g["t1"] for g in gens)
         print(f"{annee} : {sum(g['population'] for g in gens):,.0f} adultes, "
