@@ -139,6 +139,35 @@ h3 { font-weight: 700; font-size: 1.15rem; line-height: 1.2; }
 .puces button:hover { border-color: var(--text); color: var(--text); }
 .puces button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 600; }
 
+/* Courbes du vote par âge */
+.courbes { padding-block: 8px 40px; display: flex; flex-direction: column; gap: 14px; }
+.courbes .tete-section { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 14px 24px; padding-top: 14px; border-top: 1px solid var(--border-dark); }
+.courbes .tete-section > div:first-child { display: flex; flex-direction: column; gap: 6px; max-width: 70ch; }
+.cles { display: flex; flex-wrap: wrap; gap: 4px 16px; }
+.cles button { display: inline-flex; align-items: center; gap: 7px; font-family: var(--font-sans); font-size: 12px; font-weight: 500; color: var(--text-secondary); background: none; border: 0; padding: 4px 0; cursor: pointer; transition: color 0.15s; }
+.cles button:hover, .cles button[aria-pressed="true"] { color: var(--text); }
+.cles svg { flex-shrink: 0; }
+.figure-courbes { background: var(--bg-card); border: 1px solid var(--border); padding: 12px 12px 6px; position: relative; }
+.figure-courbes .defile { overflow-x: auto; }
+.figure-courbes svg.trace { display: block; width: 100%; min-width: 600px; height: auto; }
+.trace text { font-family: var(--font-sans); font-size: 11px; fill: var(--text-muted); }
+.trace .valeur-axe { font-family: var(--font-mono); font-size: 10px; }
+.trace .tranche-axe { font-size: 11.5px; font-weight: 500; fill: var(--text-secondary); }
+.trace .serie { transition: opacity 0.15s; }
+.trace.focus .serie { opacity: 0.16; }
+.trace.focus .serie.active { opacity: 1; }
+.trace .etiquette-fin { font-size: 12px; font-weight: 600; fill: var(--text); }
+.trace .etiquette-fin tspan.v { font-family: var(--font-mono); font-weight: 600; fill: var(--text-secondary); }
+.trace .viseur { stroke: var(--border-dark); stroke-width: 1; }
+.trace .titre-bande { font-size: 11.5px; font-weight: 600; fill: var(--text-secondary); }
+.trace .valeur-barre { font-family: var(--font-mono); font-size: 11px; font-weight: 600; fill: var(--text); }
+.bulle-courbes { position: absolute; pointer-events: none; background: var(--bg-card); border: 1px solid var(--border-dark); padding: 8px 10px; font-size: 12px; min-width: 180px; z-index: 5; }
+.bulle-courbes .titre { font-weight: 600; margin: 0 0 4px; }
+.bulle-courbes .ligne { display: grid; grid-template-columns: 14px minmax(0, 1fr) auto; gap: 8px; align-items: center; }
+.bulle-courbes .ligne b { font-family: var(--font-mono); font-weight: 600; text-align: right; }
+.bulle-courbes .ligne span:nth-child(2) { color: var(--text-secondary); }
+.bulle-courbes .pied { border-top: 1px solid var(--border); margin-top: 5px; padding-top: 5px; color: var(--text-secondary); }
+
 /* Simulateur */
 .simulateur { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); border-bottom: 1px solid var(--border); }
 .resultats { padding: 28px 40px 32px 0; display: flex; flex-direction: column; gap: 22px; min-width: 0; }
@@ -308,6 +337,29 @@ tr.total td { font-weight: 700; border-bottom: 0; }
         <p class="chapo">Chaque génération ne vote ni autant ni de la même façon. Faites varier, pour chaque tranche d'âge, la participation et le choix des candidats, et voyez ce que seraient devenus les résultats officiels de la présidentielle 2022 et des européennes 2024.</p>
       </div>
       <div class="duel" id="duel" aria-label="Deux têtes de liste, deux générations"></div>
+    </section>
+
+    <!-- Courbes du vote par âge -->
+    <section class="courbes" id="courbes" aria-labelledby="courbes-titre">
+      <div class="tete-section">
+        <div>
+          <h2 id="courbes-titre">Chaque candidat a son âge</h2>
+          <p class="note" id="courbes-chapo"></p>
+        </div>
+        <div class="bascule petite" role="group" aria-label="Scrutin des courbes">
+          <button type="button" data-sim-election="2022">Présidentielle 2022</button>
+          <button type="button" data-sim-election="2024">Européennes 2024</button>
+        </div>
+      </div>
+      <div class="cles" id="courbes-cles" role="group" aria-label="Mettre une courbe en avant"></div>
+      <div class="figure-courbes" id="figure-courbes">
+        <div class="defile"><svg class="trace" id="trace-courbes" viewBox="0 0 780 470" role="img" aria-labelledby="courbes-titre"></svg></div>
+        <div class="bulle-courbes" id="bulle-courbes" hidden></div>
+      </div>
+      <details>
+        <summary>Voir les chiffres par tranche d'âge</summary>
+        <div class="tableau"><table id="tableau-courbes"></table></div>
+      </details>
     </section>
 
     <!-- Simulateur -->
@@ -610,6 +662,7 @@ function rendreSimu() {
   document.getElementById('sim-total-reel').textContent = '· réelle ' + pct(reel.total / inscrits);
   document.querySelectorAll('[data-scenario]').forEach(btn => btn.setAttribute('aria-pressed', btn.dataset.scenario === sim.scenario));
   document.querySelectorAll('[data-sim-election]').forEach(btn => btn.setAttribute('aria-pressed', btn.dataset.simElection === sim.election));
+  if (courbes.election !== sim.election) { courbes.election = sim.election; courbes.focus = null; rendreCourbes(); }
 }
 
 /* ───────────── Ouverture : deux têtes de liste, deux générations ───────────── */
@@ -749,6 +802,159 @@ function rendreGraphique(r) {
     zone.addEventListener('mouseleave', cacher);
     zone.addEventListener('touchstart', montrer, { passive: true });
   });
+}
+
+/* ───────────── Courbes du vote par âge ───────────── */
+
+// Une courbe par grand candidat (au-dessus de 7 %), les autres regroupés.
+const SERIES_COURBES = { '2022': ['macron', 'le_pen', 'melenchon', 'zemmour'], '2024': ['bardella', 'hayer', 'glucksmann', 'aubry', 'bellamy'] };
+// Pointillés quand deux couleurs de parti sont proches (PS et LFI, RN et LR).
+const TIRETS = { glucksmann: '7 4', bellamy: '7 4', autres: '2 4' };
+const courbes = { focus: null };
+
+function seriesCourbes(election) {
+  const S = window.DONNEES.simulation[election];
+  const series = SERIES_COURBES[election].map(id => {
+    const c = S.candidats.find(x => x.id === id);
+    return { id, nom: c.nom, court: c.nom.split(' ').slice(1).join(' '), couleur: 'var(--c-' + COULEURS[id] + ')', valeurs: c.parTranche };
+  });
+  const autres = S.tranches.map((_, j) => 1 - series.reduce((s, x) => s + x.valeurs[j], 0));
+  series.push({ id: 'autres', nom: 'Autres candidats', court: 'Autres', couleur: 'var(--c-autres)', valeurs: autres });
+  return series;
+}
+
+function rendreCourbes() {
+  const election = sim.election;
+  const S = window.DONNEES.simulation[election];
+  const series = seriesCourbes(election);
+  const tranches = tranchesReelles(election);
+  const svg = document.getElementById('trace-courbes');
+  const W = 780, G = 46, D = 190, HAUT = 18, BAS = 300, AXE = 326, BANDE_HAUT = 362, BANDE_BAS = 440;
+  const pas = (W - G - D) / (S.tranches.length - 1);
+  const x = j => G + j * pas;
+  const yMax = Math.ceil(Math.max(...series.flatMap(s => s.valeurs)) * 10) / 10;
+  const y = v => BAS - (BAS - HAUT) * v / yMax;
+  const NS = 'http://www.w3.org/2000/svg';
+  const el = (nom, attrs, parent) => { const e = document.createElementNS(NS, nom); for (const k in attrs) e.setAttribute(k, attrs[k]); (parent || svg).appendChild(e); return e; };
+  svg.replaceChildren();
+  svg.classList.toggle('focus', courbes.focus !== null);
+
+  // Grille et axe des pourcentages
+  for (let v = 0; v <= yMax + 1e-9; v += 0.1) {
+    el('line', { x1: G, x2: W - D + 8, y1: y(v), y2: y(v), stroke: v === 0 ? 'var(--border-dark)' : 'var(--border)' });
+    el('text', { x: G - 8, y: y(v) + 3, 'text-anchor': 'end', class: 'valeur-axe' }).textContent = nombre(v * 100, 0) + NBSP + '%';
+  }
+  S.tranches.forEach((t, j) => {
+    el('text', { x: x(j), y: AXE, 'text-anchor': 'middle', class: 'tranche-axe' }).textContent = t.replace(' et plus', ' et +');
+  });
+
+  // Courbes, points, zones de survol de chaque série
+  const groupe = el('g', {});
+  series.forEach(s => {
+    const g = el('g', { class: 'serie' + (courbes.focus === s.id ? ' active' : ''), 'data-serie': s.id }, groupe);
+    const d = s.valeurs.map((v, j) => (j ? 'L' : 'M') + x(j).toFixed(1) + ',' + y(v).toFixed(1)).join('');
+    el('path', { d, fill: 'none', stroke: s.couleur, 'stroke-width': s.id === 'autres' ? 1.5 : 2.5, 'stroke-dasharray': TIRETS[s.id] || 'none', 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }, g);
+    s.valeurs.forEach((v, j) => el('circle', { cx: x(j), cy: y(v), r: s.id === 'autres' ? 3 : 4, fill: s.couleur, stroke: 'var(--bg-card)', 'stroke-width': 2 }, g));
+    const zone = el('path', { d, fill: 'none', stroke: 'transparent', 'stroke-width': 16, style: 'cursor:pointer' }, g);
+    zone.addEventListener('mouseenter', () => mettreEnAvant(s.id));
+    zone.addEventListener('mouseleave', () => mettreEnAvant(null));
+  });
+
+  // Étiquettes de fin de courbe, écartées pour ne pas se chevaucher (28 px minimum)
+  const ECART = 28;
+  const fins = series.map(s => ({ s, cible: y(s.valeurs[s.valeurs.length - 1]) })).sort((a, b) => a.cible - b.cible);
+  fins.forEach((f, i) => { f.y = Math.max(f.cible, i ? fins[i - 1].y + ECART : HAUT); });
+  for (let i = fins.length - 1; i >= 0; i--) {
+    const plafond = i === fins.length - 1 ? BAS : fins[i + 1].y - ECART;
+    fins[i].y = Math.min(fins[i].y, plafond);
+  }
+  fins.forEach(f => {
+    const g = el('g', { class: 'serie' + (courbes.focus === f.s.id ? ' active' : ''), 'data-serie': f.s.id });
+    const x0 = x(S.tranches.length - 1) + 12;
+    el('line', { x1: x0 - 8, x2: x0 - 2, y1: f.cible, y2: f.y, stroke: 'var(--border-mid)' }, g);
+    let xt = x0;
+    if (PORTRAITS[f.s.id]) {
+      el('image', { href: 'portraits/' + f.s.id + '.jpg', x: x0, y: f.y - 12, width: 24, height: 24 }, g);
+      xt = x0 + 30;
+    }
+    const t = el('text', { x: xt, y: f.y + 4, class: 'etiquette-fin' }, g);
+    t.textContent = f.s.court + ' ';
+    const v = el('tspan', { class: 'v' }, t);
+    v.textContent = pct(f.s.valeurs[f.s.valeurs.length - 1], 0);
+  });
+
+  // Bande de participation, sur le même axe des âges
+  el('text', { x: G, y: BANDE_HAUT - 12, class: 'titre-bande' }).textContent = 'Participation des inscrits de chaque tranche';
+  el('line', { x1: G, x2: W - D + 8, y1: BANDE_BAS, y2: BANDE_BAS, stroke: 'var(--border-dark)' });
+  tranches.forEach((t, j) => {
+    const h = (BANDE_BAS - BANDE_HAUT) * t.participation;
+    el('rect', { x: x(j) - 17, y: BANDE_BAS - h, width: 34, height: h, fill: 'var(--text-muted)' });
+    el('text', { x: x(j), y: BANDE_BAS - h - 5, 'text-anchor': 'middle', class: 'valeur-barre' }).textContent = pct(t.participation, 0);
+  });
+
+  // Viseur : une colonne de survol par tranche, l'info-bulle liste toutes les séries
+  const viseur = el('line', { x1: 0, x2: 0, y1: HAUT, y2: BANDE_BAS, class: 'viseur', visibility: 'hidden' });
+  const bulle = document.getElementById('bulle-courbes'), figure = document.getElementById('figure-courbes');
+  S.tranches.forEach((tranche, j) => {
+    const zone = el('rect', { x: x(j) - pas / 2, y: HAUT, width: pas, height: BANDE_BAS - HAUT, fill: 'transparent', tabindex: 0, 'aria-label': tranche });
+    const montrer = () => {
+      viseur.setAttribute('x1', x(j)); viseur.setAttribute('x2', x(j)); viseur.setAttribute('visibility', 'visible');
+      bulle.replaceChildren();
+      const titre = document.createElement('p'); titre.className = 'titre'; titre.textContent = tranche + ', parmi les votants'; bulle.appendChild(titre);
+      [...series].sort((a, b) => b.valeurs[j] - a.valeurs[j]).forEach(s => {
+        const ligne = document.createElement('div'); ligne.className = 'ligne';
+        ligne.innerHTML = '<svg width="14" height="4" aria-hidden="true"><line x1="0" x2="14" y1="2" y2="2" stroke="' + s.couleur + '" stroke-width="2.5" stroke-dasharray="' + (TIRETS[s.id] ? '3 2' : 'none') + '"/></svg>';
+        const nomS = document.createElement('span'); nomS.textContent = s.nom;
+        const val = document.createElement('b'); val.textContent = pct(s.valeurs[j]);
+        ligne.append(nomS, val); bulle.appendChild(ligne);
+      });
+      const pied = document.createElement('p'); pied.className = 'pied';
+      pied.textContent = 'Participation : ' + pct(tranches[j].participation, 0) + ' des inscrits';
+      bulle.appendChild(pied);
+      bulle.hidden = false;
+      const cadre = figure.getBoundingClientRect(), r = zone.getBoundingClientRect();
+      let gauche = r.left - cadre.left + r.width / 2 + 14;
+      if (gauche + bulle.offsetWidth > cadre.width - 8) gauche = r.left - cadre.left + r.width / 2 - bulle.offsetWidth - 14;
+      bulle.style.left = Math.max(8, gauche) + 'px';
+      bulle.style.top = '24px';
+    };
+    const cacher = () => { bulle.hidden = true; viseur.setAttribute('visibility', 'hidden'); };
+    zone.addEventListener('mouseenter', montrer); zone.addEventListener('focus', montrer);
+    zone.addEventListener('mouseleave', cacher); zone.addEventListener('blur', cacher);
+    zone.addEventListener('touchstart', montrer, { passive: true });
+  });
+  // Les courbes restent au-dessus des colonnes de survol pour pouvoir être désignées
+  svg.appendChild(groupe);
+
+  // Légende cliquable : met une courbe en avant
+  document.getElementById('courbes-cles').innerHTML = series.map(s =>
+    '<button type="button" data-cle="' + s.id + '" aria-pressed="' + (courbes.focus === s.id) + '">' +
+      '<svg width="22" height="6" aria-hidden="true"><line x1="0" x2="22" y1="3" y2="3" stroke="' + s.couleur + '" stroke-width="2.5" stroke-dasharray="' + (TIRETS[s.id] ? '4 3' : 'none') + '"/></svg>' + s.nom + '</button>').join('');
+  document.querySelectorAll('[data-cle]').forEach(b => b.addEventListener('click', () => {
+    courbes.focus = courbes.focus === b.dataset.cle ? null : b.dataset.cle; rendreCourbes();
+  }));
+
+  // Phrase d'introduction : la plus forte baisse et la plus forte hausse avec l'âge
+  const principaux = series.filter(s => s.id !== 'autres');
+  const pente = s => s.valeurs[s.valeurs.length - 1] - s.valeurs[0];
+  const baisse = [...principaux].sort((a, b) => pente(a) - pente(b))[0], hausse = [...principaux].sort((a, b) => pente(b) - pente(a))[0];
+  const fin = v => v.valeurs[v.valeurs.length - 1];
+  document.getElementById('courbes-chapo').textContent =
+    baisse.nom + ' passe de ' + pct(baisse.valeurs[0], 0) + ' des votants de 18-24 ans à ' + pct(fin(baisse), 0) + ' des 70 ans et plus. ' +
+    hausse.nom + ' suit le chemin inverse, de ' + pct(hausse.valeurs[0], 0) + ' à ' + pct(fin(hausse), 0) + '. Comme les aînés votent bien davantage, leur courbe pèse plus lourd dans le résultat.';
+
+  // Tableau des chiffres
+  document.getElementById('tableau-courbes').innerHTML =
+    '<thead><tr><th>Part des votants</th>' + S.tranches.map(t => '<th>' + t + '</th>').join('') + '</tr></thead><tbody>' +
+    series.map(s => '<tr><td>' + s.nom + '</td>' + s.valeurs.map(v => '<td>' + pct(v) + '</td>').join('') + '</tr>').join('') +
+    '<tr class="total"><td>Participation des inscrits</td>' + tranches.map(t => '<td>' + pct(t.participation) + '</td>').join('') + '</tr></tbody>';
+}
+
+function mettreEnAvant(id) {
+  const svg = document.getElementById('trace-courbes');
+  const actif = id || courbes.focus;
+  svg.classList.toggle('focus', actif !== null);
+  svg.querySelectorAll('.serie').forEach(g => g.classList.toggle('active', g.dataset.serie === actif));
 }
 
 /* ───────────── Interactions ───────────── */
