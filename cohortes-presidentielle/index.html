@@ -37,7 +37,7 @@
 
   /* Couleurs partisanes : réservées aux résultats */
   --c-extreme-gauche: #8E1B1B; --c-lfi: #E8333A; --c-pcf: #B5121B; --c-ecolo: #00A86B; --c-ps: #ED6F8B;
-  --c-renaissance: #3366CC; --c-lr: #1B3A6B; --c-resistons: #B08A4A; --c-dlf: #4E6E9E; --c-rn: #0A1833;
+  --c-renaissance: #3366CC; --c-horizons: #5B8FBF; --c-lr: #1B3A6B; --c-resistons: #B08A4A; --c-dlf: #4E6E9E; --c-rn: #0A1833;
   --c-reconquete: #6B3A1F; --c-autres: #9A9A92;
 
   --font-serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
@@ -140,7 +140,7 @@ h3 { font-weight: 700; font-size: 1.15rem; line-height: 1.2; }
 .puces button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 600; }
 
 /* Courbes du vote par âge */
-.courbes { padding-block: 8px 40px; display: flex; flex-direction: column; gap: 14px; }
+.courbes { padding-block: 56px 8px; display: flex; flex-direction: column; gap: 14px; }
 .courbes .tete-section { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 14px 24px; padding-top: 14px; border-top: 1px solid var(--border-dark); }
 .courbes .tete-section > div:first-child { display: flex; flex-direction: column; gap: 6px; max-width: 70ch; }
 .cles { display: flex; flex-wrap: wrap; gap: 4px 16px; }
@@ -334,38 +334,16 @@ tr.total td { font-weight: 700; border-bottom: 0; }
     <section class="ouverture">
       <div class="texte">
         <h1>Et si les jeunes votaient autant, et pour les mêmes candidats, que leurs aînés&nbsp;?</h1>
-        <p class="chapo">Chaque génération ne vote ni autant ni de la même façon. Faites varier, pour chaque tranche d'âge, la participation et le choix des candidats, et voyez ce que seraient devenus les résultats officiels de la présidentielle 2022 et des européennes 2024.</p>
+        <p class="chapo">Chaque génération ne vote ni autant ni de la même façon. Faites varier, pour chaque tranche d'âge, la participation et le choix des candidats, et voyez ce que deviendraient les intentions de vote pour 2027, ou les résultats de la présidentielle 2022 et des européennes 2024.</p>
       </div>
       <div class="duel" id="duel" aria-label="Deux têtes de liste, deux générations"></div>
-    </section>
-
-    <!-- Courbes du vote par âge -->
-    <section class="courbes" id="courbes" aria-labelledby="courbes-titre">
-      <div class="tete-section">
-        <div>
-          <h2 id="courbes-titre">Chaque candidat a son âge</h2>
-          <p class="note" id="courbes-chapo"></p>
-        </div>
-        <div class="bascule petite" role="group" aria-label="Scrutin des courbes">
-          <button type="button" data-sim-election="2022">Présidentielle 2022</button>
-          <button type="button" data-sim-election="2024">Européennes 2024</button>
-        </div>
-      </div>
-      <div class="cles" id="courbes-cles" role="group" aria-label="Mettre une courbe en avant"></div>
-      <div class="figure-courbes" id="figure-courbes">
-        <div class="defile"><svg class="trace" id="trace-courbes" viewBox="0 0 780 470" role="img" aria-labelledby="courbes-titre"></svg></div>
-        <div class="bulle-courbes" id="bulle-courbes" hidden></div>
-      </div>
-      <details>
-        <summary>Voir les chiffres par tranche d'âge</summary>
-        <div class="tableau"><table id="tableau-courbes"></table></div>
-      </details>
     </section>
 
     <!-- Simulateur -->
     <section id="simulateur" aria-label="Simulateur">
       <div class="commande">
         <div class="bascule" role="group" aria-label="Scrutin">
+          <button type="button" data-sim-election="2027">Présidentielle 2027 · sondage</button>
           <button type="button" data-sim-election="2022">Présidentielle 2022 · 1er tour</button>
           <button type="button" data-sim-election="2024">Européennes 2024</button>
         </div>
@@ -382,7 +360,7 @@ tr.total td { font-weight: 700; border-bottom: 0; }
           <div class="tete" id="sim-tete"></div>
           <div class="legende">
             <span><span class="pastille" style="background:var(--text-muted)"></span>Score simulé, dans la couleur du parti</span>
-            <span><span class="trait"></span>Résultat officiel</span>
+            <span><span class="trait"></span><span id="legende-reference">Résultat officiel</span></span>
           </div>
           <div class="liste" id="sim-liste"></div>
         </div>
@@ -390,7 +368,7 @@ tr.total td { font-weight: 700; border-bottom: 0; }
         <div class="reglages">
           <div class="entete-reglages">
             <h3>Réglage par tranche d'âge</h3>
-            <button type="button" class="btn-lien" id="sim-reinit">Revenir au résultat officiel</button>
+            <button type="button" class="btn-lien" id="sim-reinit">Revenir au point de départ</button>
           </div>
           <p class="note" style="font-size:12px">Deux réglages indépendants par tranche. Le curseur règle la participation, c'est-à-dire combien d'inscrits se déplacent ; le trait fin marque son niveau réel. Le menu règle les choix de candidats, c'est-à-dire pour qui votent ceux qui se déplacent.</p>
           <div id="sim-ages"></div>
@@ -401,6 +379,30 @@ tr.total td { font-weight: 700; border-bottom: 0; }
           </div>
         </div>
       </div>
+    </section>
+
+    <!-- Courbes du vote par âge -->
+    <section class="courbes" id="courbes" aria-labelledby="courbes-titre">
+      <div class="tete-section">
+        <div>
+          <h2 id="courbes-titre">Chaque candidat a son âge</h2>
+          <p class="note" id="courbes-chapo"></p>
+        </div>
+        <div class="bascule petite" role="group" aria-label="Scrutin des courbes">
+          <button type="button" data-sim-election="2027">Présidentielle 2027</button>
+          <button type="button" data-sim-election="2022">Présidentielle 2022</button>
+          <button type="button" data-sim-election="2024">Européennes 2024</button>
+        </div>
+      </div>
+      <div class="cles" id="courbes-cles" role="group" aria-label="Mettre une courbe en avant"></div>
+      <div class="figure-courbes" id="figure-courbes">
+        <div class="defile"><svg class="trace" id="trace-courbes" viewBox="0 0 780 470" role="img" aria-labelledby="courbes-titre"></svg></div>
+        <div class="bulle-courbes" id="bulle-courbes" hidden></div>
+      </div>
+      <details>
+        <summary>Voir les chiffres par tranche d'âge</summary>
+        <div class="tableau"><table id="tableau-courbes"></table></div>
+      </details>
     </section>
 
     <!-- Poids des générations -->
@@ -445,6 +447,7 @@ tr.total td { font-weight: 700; border-bottom: 0; }
           <h3>Les scores</h3>
           <div class="formule">score = Σ votants de la tranche × vote de la tranche</div>
           <p>Le vote de chaque tranche d'âge vient des enquêtes Ipsos du jour du vote (environ 4 000 inscrits en 2022, 8 900 en 2024). Ces pourcentages sont légèrement ajustés, par calage itératif, pour que la participation réelle redonne exactement les résultats officiels.</p>
+          <p>Pour 2027, le vote par âge vient de l'Enquête électorale française d'Ipsos bva et du CEVIPOF (13 060 inscrits interrogés du 3 au 9 septembre 2026), dans l'hypothèse où Raphaël Glucksmann et Édouard Philippe sont candidats. La participation de chaque âge est supposée identique à celle de 2022. C'est un sondage à sept mois du scrutin, pas une prévision.</p>
         </div>
         <div>
           <h3>Les limites</h3>
@@ -458,7 +461,7 @@ tr.total td { font-weight: 700; border-bottom: 0; }
 
   <footer class="source">
     <div class="cadre">
-      <p>Source : ministère de l'Intérieur (résultats officiels) ; Ipsos, « Sociologie des électorats », 1er tour de la présidentielle 2022 et européennes 2024 ; INSEE via insee.fr (estimations de population, Répertoire électoral unique 2022, 2024 et 2026, enquête sur la participation électorale 2022) — Simulation et projection à titre indicatif</p>
+      <p>Source : ministère de l'Intérieur (résultats officiels) ; Ipsos, « Sociologie des électorats », 1er tour de la présidentielle 2022 et européennes 2024 ; Ipsos bva - CESI pour le CEVIPOF, la Fondation Jean-Jaurès, l'Institut Montaigne et Le Monde, Enquête électorale française 2026, vague 3 (septembre 2026) ; INSEE via insee.fr (estimations de population, Répertoire électoral unique 2022, 2024 et 2026, enquête sur la participation électorale 2022) — Simulation et projection à titre indicatif</p>
       <p id="credits-photos"></p>
     </div>
   </footer>
@@ -478,7 +481,7 @@ const GENERATIONS = [
 
 // Couleur de chaque candidat ou liste, d'après son parti.
 const COULEURS = {
-  poutou_arthaud: 'extreme-gauche', melenchon: 'lfi', aubry: 'lfi', roussel: 'pcf', deffontaines: 'pcf',
+  poutou_arthaud: 'extreme-gauche', arthaud: 'extreme-gauche', tondelier: 'ecolo', philippe: 'horizons', retailleau: 'lr', melenchon: 'lfi', aubry: 'lfi', roussel: 'pcf', deffontaines: 'pcf',
   jadot: 'ecolo', toussaint: 'ecolo', hidalgo: 'ps', glucksmann: 'ps', macron: 'renaissance', hayer: 'renaissance',
   pecresse: 'lr', bellamy: 'lr', lassalle: 'resistons', dupont_aignan: 'dlf', le_pen: 'rn', bardella: 'rn',
   zemmour: 'reconquete', marechal: 'reconquete', autres: 'autres',
@@ -496,6 +499,8 @@ const PORTRAITS = {
   glucksmann: { nom: 'Raphaël Glucksmann', credit: '© Union européenne 2024, source : Parlement européen' },
   aubry: { nom: 'Manon Aubry', credit: '© Union européenne 2024, source : Parlement européen' },
   bellamy: { nom: 'François-Xavier Bellamy', credit: '© Union européenne 2024, source : Parlement européen' },
+  philippe: { nom: 'Édouard Philippe', credit: 'Wasasaq8, CC0, recadrée' },
+  retailleau: { nom: 'Bruno Retailleau', credit: 'Anthony Montardy, CC BY 4.0, recadrée' },
 };
 const portrait = id => PORTRAITS[id]
   ? '<img class="portrait" src="portraits/' + id + '.jpg" alt="Portrait de ' + PORTRAITS[id].nom + '" width="240" height="240" loading="lazy">'
@@ -510,14 +515,20 @@ const pts = x => {
   const signe = v > 0 ? '+' : v < 0 ? '−' : '±';
   return signe + nombre(Math.abs(v), 1) + NBSP + 'pt' + (Math.abs(v) >= 2 ? 's' : '');
 };
-const ecartPts = x => nombre(x * 100, 1) + NBSP + 'pt' + (x * 100 >= 2 ? 's' : '');
+const ecartPts = x => { const v = Math.round(x * 1000) / 10; return nombre(v, 1) + NBSP + 'pt' + (v >= 2 ? 's' : ''); };
 const millions = x => nombre(x / 1e6, 1) + NBSP + 'million' + (x >= 2e6 ? 's' : '');
 const entier = x => Math.round(x).toLocaleString('fr-FR').replace(/ /g, NBSP);
 const somme = (liste, f) => liste.reduce((s, x) => s + f(x), 0);
 
 /* ───────────── Simulateur ───────────── */
 
-const sim = { election: '2022', participation: [], comme: [], scenario: 'reel' };
+const sim = { election: '2027', participation: [], comme: [], scenario: 'reel' };
+
+const SCRUTINS = {
+  '2022': { nom: 'Présidentielle 2022 · 1er tour', reference: 'Résultat officiel', court: 'officiel', presidentielle: true, futur: false },
+  '2024': { nom: 'Européennes 2024', reference: 'Résultat officiel', court: 'officiel', presidentielle: false, futur: false },
+  '2027': { nom: 'Présidentielle 2027 · 1er tour', reference: 'Sondage de septembre 2026', court: 'sondage', presidentielle: true, futur: true },
+};
 
 // Inscrits et participation réelle de chaque tranche d'âge d'Ipsos, à partir des données par âge.
 function tranchesReelles(election) {
@@ -573,7 +584,7 @@ function construireReglages() {
   const t = tranchesReelles(sim.election);
   document.getElementById('scenarios').innerHTML = Object.entries(GROUPES_SCENARIOS).map(([groupe, titre]) =>
     '<div class="groupe-scenarios" role="group" aria-label="' + titre + '"><p class="label">' + titre + '</p>' +
-      SCENARIOS.filter(s => s.groupe === groupe).map(s => '<button type="button" data-scenario="' + s.id + '">' + s.nom + '</button>').join('') +
+      SCENARIOS.filter(s => s.groupe === groupe).map(s => '<button type="button" data-scenario="' + s.id + '">' + (s.id === 'reel' ? SCRUTINS[sim.election].reference : s.nom) + '</button>').join('') +
     '</div>').join('');
   document.getElementById('sim-ages').innerHTML = t.map((x, j) =>
     '<div class="age" id="age-' + j + '">' +
@@ -581,7 +592,7 @@ function construireReglages() {
       '<div class="curseur"><span class="repere" style="left:calc(7px + (100% - 14px) * ' + x.participation + ')"></span>' +
         '<input type="range" id="sim-p-' + j + '" min="0" max="100" step="1" aria-label="Participation des ' + x.nom + '"></div>' +
       '<output id="sim-p-' + j + '-val" for="sim-p-' + j + '"></output>' +
-      '<div class="sous"><span>réel ' + pct(x.participation, 0) + '</span>' +
+      '<div class="sous"><span>' + (SCRUTINS[sim.election].futur ? 'comme en 2022 : ' : 'réel ') + pct(x.participation, 0) + '</span>' +
         '<select id="sim-c-' + j + '" aria-label="Choix de vote des ' + x.nom + '">' +
           t.map((y, k) => '<option value="' + k + '">' + (k === j ? 'ses propres choix de candidats' : 'choisit comme les ' + y.nom) + '</option>').join('') +
         '</select></div>' +
@@ -594,7 +605,8 @@ function construireReglages() {
 }
 
 function rendreSimu() {
-  const presidentielle = sim.election === '2022';
+  const scrutin = SCRUTINS[sim.election];
+  const presidentielle = scrutin.presidentielle;
   const t = tranchesReelles(sim.election);
   const inscrits = somme(t, x => x.inscrits);
   const reel = scores(sim.election, t.map(x => x.participation), t.map((_, j) => j));
@@ -606,17 +618,21 @@ function rendreSimu() {
   const [a, b, c] = ordre;
   const nom = x => x.nom.replace('Autres listes', 'les autres listes');
 
-  document.getElementById('sim-label').textContent = (presidentielle ? 'Présidentielle 2022 · 1er tour' : 'Européennes 2024') + ' · ' + (scenario ? scenario.nom : 'Scénario personnalisé');
+  document.getElementById('sim-label').textContent = scrutin.nom + ' · ' + (scenario ? (scenario.id === 'reel' ? scrutin.reference : scenario.nom) : 'Scénario personnalisé');
+  document.getElementById('legende-reference').textContent = scrutin.reference;
 
   let titre, chapo;
   if (sim.scenario === 'reel') {
     titre = presidentielle ? a.nom + ' et ' + b.nom + ' qualifiés, ' + c.nom + ' à ' + ecartPts(b.score - c.score) : a.nom + ' en tête, loin devant ' + b.nom;
-    chapo = 'Voici le résultat officiel. Choisissez un scénario ci-dessus, ou réglez chaque tranche d’âge, pour le transformer.';
+    chapo = (scrutin.futur ? 'Voici les intentions de vote du dernier grand sondage, avec une participation par âge identique à celle de 2022. ' : 'Voici le résultat officiel. ') +
+      'Choisissez un scénario ci-dessus, ou réglez chaque tranche d’âge, pour le transformer.';
   } else if (presidentielle) {
     const memes = [a.id, b.id].sort().join() === [ordreReel[0].id, ordreReel[1].id].sort().join();
-    titre = (memes ? 'Le second tour aurait toujours opposé ' : 'Le second tour aurait opposé ') + a.nom + ' à ' + b.nom;
+    titre = scrutin.futur
+      ? (memes ? 'Le second tour opposerait toujours ' : 'Le second tour opposerait ') + a.nom + ' à ' + b.nom
+      : (memes ? 'Le second tour aurait toujours opposé ' : 'Le second tour aurait opposé ') + a.nom + ' à ' + b.nom;
     chapo = c.nom + ' serait troisième, à ' + ecartPts(b.score - c.score) + ' de la qualification, contre ' +
-      ecartPts(officiel[ordreReel[1].id] - officiel[ordreReel[2].id]) + ' en réalité.';
+      ecartPts(officiel[ordreReel[1].id] - officiel[ordreReel[2].id]) + (scrutin.futur ? ' dans le sondage.' : ' en réalité.');
   } else {
     titre = a.nom + (a.id === ordreReel[0].id ? ' resterait en tête avec ' : ' arriverait en tête avec ') + pct(a.score);
     chapo = 'Viendraient ensuite ' + nom(b) + ' (' + pct(b.score) + ') et ' + nom(c) + ' (' + pct(c.score) + ').';
@@ -635,7 +651,7 @@ function rendreSimu() {
       '<div class="identite' + (PORTRAITS[x.id] ? '' : ' sans-photo') + '">' + portrait(x.id) +
         '<span><span class="nom">' + x.nom + '</span><span class="parti">' + x.etiquette + '</span></span></div>' +
       '<span class="score">' + pct(x.score) + '</span>' +
-      '<span class="delta">officiel ' + pct(officiel[x.id]) + ' · ' + pts(x.score - officiel[x.id]) + '</span>' +
+      '<span class="delta">' + scrutin.court + ' ' + pct(officiel[x.id]) + ' · ' + pts(x.score - officiel[x.id]) + '</span>' +
     '</div>').join('');
 
   // Liste complète, dans l'ordre du score simulé.
@@ -807,9 +823,9 @@ function rendreGraphique(r) {
 /* ───────────── Courbes du vote par âge ───────────── */
 
 // Une courbe par grand candidat (au-dessus de 7 %), les autres regroupés.
-const SERIES_COURBES = { '2022': ['macron', 'le_pen', 'melenchon', 'zemmour'], '2024': ['bardella', 'hayer', 'glucksmann', 'aubry', 'bellamy'] };
+const SERIES_COURBES = { '2027': ['le_pen', 'philippe', 'melenchon', 'glucksmann', 'retailleau'], '2022': ['macron', 'le_pen', 'melenchon', 'zemmour'], '2024': ['bardella', 'hayer', 'glucksmann', 'aubry', 'bellamy'] };
 // Pointillés quand deux couleurs de parti sont proches (PS et LFI, RN et LR).
-const TIRETS = { glucksmann: '7 4', bellamy: '7 4', autres: '2 4' };
+const TIRETS = { glucksmann: '7 4', bellamy: '7 4', retailleau: '7 4', autres: '2 4' };
 const courbes = { focus: null };
 
 function seriesCourbes(election) {

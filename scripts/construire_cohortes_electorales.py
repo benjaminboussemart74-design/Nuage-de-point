@@ -20,6 +20,11 @@ Sources Ipsos, transcrites à la main dans data/cohortes/ :
    1er tour de la présidentielle 2022 et européennes 2024), avec les résultats officiels.
 6. participation_par_age_ipsos.csv : participation par tranche d'âge, utilisée pour 2024,
    faute d'enquête de l'INSEE sur ce scrutin.
+7. Présidentielle 2027 (lignes « 2027 » de vote_par_age_ipsos.csv) : intentions de vote au 1er tour,
+   hypothèse Glucksmann-Philippe, de l'Enquête électorale française 2026, vague 3
+   (Ipsos bva - CESI pour le CEVIPOF, la Fondation Jean-Jaurès, l'Institut Montaigne et Le Monde,
+   13 060 inscrits interrogés du 3 au 9 septembre 2026, 9 327 exprimés certains d'aller voter).
+   La colonne « officiel » reprend alors l'intention de vote d'ensemble du sondage.
 
 Utilisation :
     python scripts/construire_cohortes_electorales.py
@@ -256,7 +261,7 @@ def main():
     }
     sortie = {
         "elections": elections,
-        "simulation": {"2022": simulation("2022", elections["2022"]), "2024": simulation("2024", elections["2024"])},
+        "simulation": {annee: simulation(annee, elections[annee]) for annee in ("2022", "2024", "2027")},
     }
 
     FICHIER_SORTIE.parent.mkdir(parents=True, exist_ok=True)
