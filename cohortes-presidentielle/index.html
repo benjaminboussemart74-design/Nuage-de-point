@@ -118,7 +118,9 @@ h3 { font-weight: 700; font-size: 1.15rem; line-height: 1.2; }
 .bascule button:hover { background: var(--bg-hover); color: var(--text); }
 .bascule button[aria-pressed="true"] { background: var(--text); color: var(--bg); font-weight: 600; }
 .bascule.petite button { padding: 5px 10px; font-size: 11.5px; }
-.puces { display: flex; flex-wrap: wrap; gap: 6px; }
+.puces { display: flex; flex-direction: column; gap: 8px; }
+.groupe-scenarios { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.groupe-scenarios .label { width: 100%; }
 .puces button {
   font-family: var(--font-sans); font-size: 12px; font-weight: 500; padding: 5px 11px; cursor: pointer;
   border: 1px solid var(--border-mid); border-radius: 2px; background: var(--bg-card); color: var(--text-secondary);
@@ -288,7 +290,7 @@ tr.total td { font-weight: 700; border-bottom: 0; }
       <div class="texte">
         <p class="label">Présidentielle 2022 · Européennes 2024</p>
         <h1>Et si les jeunes avaient voté <em>comme leurs aînés</em>&nbsp;?</h1>
-        <p class="chapo">Chaque génération ne vote ni autant ni de la même façon. Faites varier la participation et les choix de vote de chaque tranche d'âge, et voyez ce que seraient devenus les résultats officiels de la présidentielle 2022 et des européennes 2024.</p>
+        <p class="chapo">Chaque génération ne vote ni autant ni de la même façon. Faites varier, pour chaque tranche d'âge, la participation et le choix des candidats, et voyez ce que seraient devenus les résultats officiels de la présidentielle 2022 et des européennes 2024.</p>
       </div>
       <div class="chiffres-cles" id="chiffres-cles"></div>
     </section>
@@ -323,12 +325,12 @@ tr.total td { font-weight: 700; border-bottom: 0; }
             <p class="label">Réglage par tranche d'âge</p>
             <button type="button" class="btn-lien" id="sim-reinit">Revenir au résultat officiel</button>
           </div>
-          <p class="note" style="font-size:12px">Le curseur règle la participation, le trait fin marque son niveau réel. Le menu choisit de quelle tranche on reprend les choix de vote.</p>
+          <p class="note" style="font-size:12px">Deux réglages indépendants par tranche. Le curseur règle la participation, c'est-à-dire combien d'inscrits se déplacent ; le trait fin marque son niveau réel. Le menu règle les choix de candidats, c'est-à-dire pour qui votent ceux qui se déplacent.</p>
           <div id="sim-ages"></div>
           <div class="participation-totale"><span>Participation simulée</span><span><b id="sim-total"></b> <span id="sim-total-reel"></span></span></div>
           <div class="encart">
             <p class="titre">La participation seule change peu les scores</p>
-            <p>Chaque tranche d'âge vote pour tous les candidats, dans des proportions voisines. Les écarts deviennent nets quand on change aussi ses choix de vote.</p>
+            <p>Chaque tranche d'âge vote pour tous les candidats, dans des proportions voisines. Les écarts deviennent nets quand on change aussi ses choix de candidats.</p>
           </div>
         </div>
       </div>
@@ -442,18 +444,29 @@ function tranchesReelles(election) {
   });
 }
 
-// Scénarios prêts à l'emploi : participation (p) et tranche dont on reprend le vote (c), pour chaque tranche.
+// Scénarios prêts à l'emploi : participation (p) et tranche dont on reprend les choix de candidats (c),
+// pour chaque tranche. Le groupe indique ce que le scénario modifie.
+const GROUPES_SCENARIOS = {
+  reference: 'Point de départ',
+  participation: 'Participation seule · les choix de candidats restent réels',
+  choix: 'Choix des candidats seul · la participation reste réelle',
+  les_deux: 'Participation et choix de candidats',
+};
 const SCENARIOS = [
-  { id: 'reel', nom: 'Résultat officiel', appliquer: t => ({ p: t.map(x => x.participation), c: t.map((_, j) => j) }) },
-  { id: 'tous', nom: 'Tout le monde vote', appliquer: t => ({ p: t.map(() => 1), c: t.map((_, j) => j) }) },
-  { id: 'jeunes-participent', nom: 'Les moins de 35 ans votent autant que les 60-69 ans',
+  { id: 'reel', groupe: 'reference', nom: 'Résultat officiel', appliquer: t => ({ p: t.map(x => x.participation), c: t.map((_, j) => j) }) },
+  { id: 'tous', groupe: 'participation', nom: 'Tous les inscrits votent', appliquer: t => ({ p: t.map(() => 1), c: t.map((_, j) => j) }) },
+  { id: 'jeunes-participent', groupe: 'participation', nom: 'Les moins de 35 ans se mobilisent autant que les 60-69 ans',
     appliquer: t => ({ p: t.map((x, j) => j < 2 ? t[4].participation : x.participation), c: t.map((_, j) => j) }) },
-  { id: 'jeunes-comme-aines', nom: 'Les moins de 35 ans votent comme les 70 ans et plus',
-    appliquer: t => ({ p: t.map((x, j) => j < 2 ? t[5].participation : x.participation), c: t.map((_, j) => j < 2 ? 5 : j) }) },
-  { id: 'aines-comme-jeunes', nom: 'Les 60 ans et plus votent comme les 25-34 ans',
-    appliquer: t => ({ p: t.map((x, j) => j >= 4 ? t[1].participation : x.participation), c: t.map((_, j) => j >= 4 ? 1 : j) }) },
-  { id: 'sans-aines', nom: 'Les 70 ans et plus s’abstiennent',
+  { id: 'sans-aines', groupe: 'participation', nom: 'Les 70 ans et plus s’abstiennent tous',
     appliquer: t => ({ p: t.map((x, j) => j === 5 ? 0 : x.participation), c: t.map((_, j) => j) }) },
+  { id: 'jeunes-choisissent-aines', groupe: 'choix', nom: 'Les moins de 35 ans choisissent les mêmes candidats que les 70 ans et plus',
+    appliquer: t => ({ p: t.map(x => x.participation), c: t.map((_, j) => j < 2 ? 5 : j) }) },
+  { id: 'aines-choisissent-jeunes', groupe: 'choix', nom: 'Les 60 ans et plus choisissent les mêmes candidats que les 25-34 ans',
+    appliquer: t => ({ p: t.map(x => x.participation), c: t.map((_, j) => j >= 4 ? 1 : j) }) },
+  { id: 'jeunes-comme-aines', groupe: 'les_deux', nom: 'Les moins de 35 ans se mobilisent et choisissent comme les 70 ans et plus',
+    appliquer: t => ({ p: t.map((x, j) => j < 2 ? t[5].participation : x.participation), c: t.map((_, j) => j < 2 ? 5 : j) }) },
+  { id: 'aines-comme-jeunes', groupe: 'les_deux', nom: 'Les 60 ans et plus se mobilisent et choisissent comme les 25-34 ans',
+    appliquer: t => ({ p: t.map((x, j) => j >= 4 ? t[1].participation : x.participation), c: t.map((_, j) => j >= 4 ? 1 : j) }) },
 ];
 
 function appliquerScenario(id) {
@@ -473,7 +486,10 @@ function scores(election, participation, comme) {
 
 function construireReglages() {
   const t = tranchesReelles(sim.election);
-  document.getElementById('scenarios').innerHTML = SCENARIOS.map(s => '<button type="button" data-scenario="' + s.id + '">' + s.nom + '</button>').join('');
+  document.getElementById('scenarios').innerHTML = Object.entries(GROUPES_SCENARIOS).map(([groupe, titre]) =>
+    '<div class="groupe-scenarios" role="group" aria-label="' + titre + '"><p class="label">' + titre + '</p>' +
+      SCENARIOS.filter(s => s.groupe === groupe).map(s => '<button type="button" data-scenario="' + s.id + '">' + s.nom + '</button>').join('') +
+    '</div>').join('');
   document.getElementById('sim-ages').innerHTML = t.map((x, j) =>
     '<div class="age" id="age-' + j + '">' +
       '<label class="tranche" for="sim-p-' + j + '">' + x.nom.replace(' et plus', '&nbsp;et&nbsp;+') + '</label>' +
@@ -482,7 +498,7 @@ function construireReglages() {
       '<output id="sim-p-' + j + '-val" for="sim-p-' + j + '"></output>' +
       '<div class="sous"><span>réel ' + pct(x.participation, 0) + '</span>' +
         '<select id="sim-c-' + j + '" aria-label="Choix de vote des ' + x.nom + '">' +
-          t.map((y, k) => '<option value="' + k + '">' + (k === j ? 'vote comme elle-même' : 'vote comme les ' + y.nom) + '</option>').join('') +
+          t.map((y, k) => '<option value="' + k + '">' + (k === j ? 'ses propres choix de candidats' : 'choisit comme les ' + y.nom) + '</option>').join('') +
         '</select></div>' +
     '</div>').join('');
   document.querySelectorAll('[data-scenario]').forEach(b => b.addEventListener('click', () => { appliquerScenario(b.dataset.scenario); rendreSimu(); }));
