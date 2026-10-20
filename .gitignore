@@ -44,3 +44,6 @@ env/
 
 # Fichiers sources volumineux téléchargés (data.gouv.fr, INSEE, IGN)
 data/brut/telechargements/
+
+# Vidéos générées par scripts/video_linkedin.py
+videos/

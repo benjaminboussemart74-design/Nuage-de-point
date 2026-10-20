@@ -197,6 +197,24 @@ h3 { font-weight: 700; font-size: 1.15rem; line-height: 1.2; }
 .ligne-res .qui .portrait { width: 26px; height: 26px; }
 .ligne-res .qui small { color: var(--text-muted); font-weight: 400; font-size: 11px; }
 .piste { height: 6px; background: var(--bg-sidebar); position: relative; }
+/* Diagramme avant / après : point creux = point de départ, point plein = score simulé */
+.halt { position: relative; height: 22px; min-width: 0; margin: 0 8px; }
+.halt::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: var(--border-mid); }
+.halt .graduation { position: absolute; top: 4px; bottom: 4px; width: 1px; background: var(--border); }
+.halt .segment { position: absolute; top: 50%; height: 4px; margin-top: -2px; background: var(--couleur); opacity: 0.4; transition: left 0.6s cubic-bezier(0.22, 1, 0.36, 1), width 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
+.halt .point { position: absolute; top: 50%; width: 13px; height: 13px; margin: -6.5px 0 0 -6.5px; border-radius: 50%; transition: left 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
+.halt .depart { background: var(--bg-card); border: 2px solid var(--couleur); }
+.halt .simule { background: var(--couleur); outline: 2px solid var(--bg-card); z-index: 1; }
+.echelle { display: grid; grid-template-columns: 212px minmax(0, 1fr) 62px 64px; gap: 12px; padding-bottom: 4px; border-bottom: 1px solid var(--border-dark); }
+.echelle .graduations { position: relative; height: 14px; margin: 0 8px; }
+.echelle .graduations span { position: absolute; transform: translateX(-50%); font-family: var(--font-mono); font-size: 10px; color: var(--text-muted); }
+.echelle .graduations span:first-child { transform: none; }
+.echelle .graduations span:last-child { transform: translateX(-100%); }
+.echelle .entete-col { font-size: 11px; color: var(--text-muted); text-align: right; }
+.cle-point { display: inline-block; width: 11px; height: 11px; border-radius: 50%; border: 2px solid var(--text-secondary); }
+.cle-point.plein { background: var(--text-secondary); }
+.ecart.hausse { color: var(--green-leg); }
+.ecart.baisse { color: var(--red); }
 .piste .rempli { position: absolute; inset: 0 auto 0 0; transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
 .piste .officiel { position: absolute; top: -4px; bottom: -4px; width: 2px; margin-left: -1px; background: var(--text); transition: left 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
 .ligne-res .val { font-family: var(--font-mono); font-weight: 600; font-size: 12.5px; text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
@@ -284,7 +302,7 @@ tr.total td { font-weight: 700; border-bottom: 0; }
 .source p { font-size: 11px; color: var(--text-muted); margin: 0; }
 .source p + p { margin-top: 6px; }
 
-@media (prefers-reduced-motion: reduce) { .piste .rempli, .piste .officiel { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .piste .rempli, .piste .officiel, .halt .segment, .halt .point { transition: none; } }
 
 @media (max-width: 960px) {
   .ouverture { grid-template-columns: 1fr; gap: 28px; padding-block: 32px 28px; }
@@ -302,7 +320,9 @@ tr.total td { font-weight: 700; border-bottom: 0; }
   .tete.trois .place .score { grid-column: 2; grid-row: 2 / 4; margin: 0; font-size: 24px; align-self: center; }
   .place .score { font-size: 28px; }
   .ligne-res { grid-template-columns: minmax(0, 1fr) 58px 58px; gap: 4px 10px; }
-  .ligne-res .piste { grid-column: 1 / -1; grid-row: 2; }
+  .ligne-res .piste, .ligne-res .halt { grid-column: 1 / -1; grid-row: 2; }
+  .echelle { grid-template-columns: minmax(0, 1fr); }
+  .echelle .entete-col, .echelle > span:first-child { display: none; }
   .generations { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .generations .generation:first-child { grid-column: span 2; }
   .commande { flex-direction: column; align-items: stretch; }
@@ -359,8 +379,8 @@ tr.total td { font-weight: 700; border-bottom: 0; }
           </div>
           <div class="tete" id="sim-tete"></div>
           <div class="legende">
-            <span><span class="pastille" style="background:var(--text-muted)"></span>Score simulé, dans la couleur du parti</span>
-            <span><span class="trait"></span><span id="legende-reference">Résultat officiel</span></span>
+            <span><span class="cle-point"></span>Point de départ&nbsp;: <span id="legende-reference">Résultat officiel</span></span>
+            <span><span class="cle-point plein"></span>Score simulé, dans la couleur du parti</span>
           </div>
           <div class="liste" id="sim-liste"></div>
         </div>
@@ -654,19 +674,21 @@ function rendreSimu() {
       '<span class="delta">' + scrutin.court + ' ' + pct(officiel[x.id]) + ' · ' + pts(x.score - officiel[x.id]) + '</span>' +
     '</div>').join('');
 
-  // Liste complète, dans l'ordre du score simulé.
-  const max = Math.max(...ordre.map(x => Math.max(x.score, officiel[x.id]))) * 1.04;
-  document.getElementById('sim-liste').innerHTML = ordre.map(x => {
+  // Diagramme avant / après : les lignes restent dans l'ordre du point de départ,
+  // seuls les points bougent, pour qu'on suive chaque candidat d'un scénario à l'autre.
+  if (liste.election !== sim.election) construireListe(reel.candidats);
+  simule.candidats.forEach(x => {
+    const ligne = liste.lignes[x.id];
+    const a = Math.min(100, officiel[x.id] / ECHELLE_MAX * 100), b = Math.min(100, x.score / ECHELLE_MAX * 100);
+    ligne.depart.style.left = a + '%';
+    ligne.simule.style.left = b + '%';
+    ligne.segment.style.left = Math.min(a, b) + '%';
+    ligne.segment.style.width = Math.abs(b - a) + '%';
     const ecart = x.score - officiel[x.id];
-    return '<div class="ligne-res">' +
-      '<span class="qui" title="' + x.nom + ' · ' + x.etiquette + '">' + (portrait(x.id) || '<i></i>') +
-        '<span>' + x.nom + ' <small>' + x.etiquette + '</small></span></span>' +
-      '<div class="piste"><div class="rempli" style="width:' + (x.score / max * 100) + '%;background:var(--c-' + COULEURS[x.id] + ')"></div>' +
-        '<span class="officiel" style="left:' + (officiel[x.id] / max * 100) + '%"></span></div>' +
-      '<span class="val">' + pct(x.score) + '</span>' +
-      '<span class="ecart' + (Math.abs(ecart) < 0.0005 ? ' nul' : '') + '">' + pts(ecart) + '</span>' +
-    '</div>';
-  }).join('');
+    ligne.val.textContent = pct(x.score);
+    ligne.ecart.textContent = (ecart > 0.0005 ? '▲ ' : ecart < -0.0005 ? '▼ ' : '') + pts(ecart);
+    ligne.ecart.className = 'ecart' + (Math.abs(ecart) < 0.0005 ? ' nul' : ecart > 0 ? ' hausse' : ' baisse');
+  });
 
   t.forEach((x, j) => {
     document.getElementById('sim-p-' + j).value = Math.round(sim.participation[j] * 100);
@@ -679,6 +701,39 @@ function rendreSimu() {
   document.querySelectorAll('[data-scenario]').forEach(btn => btn.setAttribute('aria-pressed', btn.dataset.scenario === sim.scenario));
   document.querySelectorAll('[data-sim-election]').forEach(btn => btn.setAttribute('aria-pressed', btn.dataset.simElection === sim.election));
   if (courbes.election !== sim.election) { courbes.election = sim.election; courbes.focus = null; rendreCourbes(); }
+}
+
+// Échelle commune aux trois scrutins : de 0 à 50 % des exprimés.
+const ECHELLE_MAX = 0.5;
+const liste = { election: null, lignes: {} };
+
+function construireListe(candidats) {
+  liste.election = sim.election;
+  liste.lignes = {};
+  const zone = document.getElementById('sim-liste');
+  zone.replaceChildren();
+  const echelle = document.createElement('div');
+  echelle.className = 'echelle';
+  echelle.innerHTML = '<span></span><div class="graduations">' +
+    [0, 10, 20, 30, 40, 50].map(v => '<span style="left:' + (v / 50 * 100) + '%">' + v + NBSP + '%</span>').join('') +
+    '</div><span class="entete-col">simulé</span><span class="entete-col">écart</span>';
+  zone.appendChild(echelle);
+  [...candidats].sort((a, b) => b.officiel - a.officiel).forEach(x => {
+    const ligne = document.createElement('div');
+    ligne.className = 'ligne-res';
+    ligne.style.setProperty('--couleur', 'var(--c-' + COULEURS[x.id] + ')');
+    ligne.innerHTML =
+      '<span class="qui" title="' + x.nom + ' · ' + x.etiquette + '">' + (portrait(x.id) || '<i></i>') +
+        '<span>' + x.nom + ' <small>' + x.etiquette + '</small></span></span>' +
+      '<div class="halt">' + [20, 40, 60, 80].map(v => '<span class="graduation" style="left:' + v + '%"></span>').join('') +
+        '<span class="segment"></span><span class="point depart"></span><span class="point simule"></span></div>' +
+      '<span class="val"></span><span class="ecart"></span>';
+    zone.appendChild(ligne);
+    liste.lignes[x.id] = {
+      depart: ligne.querySelector('.depart'), simule: ligne.querySelector('.simule'), segment: ligne.querySelector('.segment'),
+      val: ligne.querySelector('.val'), ecart: ligne.querySelector('.ecart'),
+    };
+  });
 }
 
 /* ───────────── Ouverture : deux têtes de liste, deux générations ───────────── */
