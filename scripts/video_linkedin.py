@@ -41,7 +41,7 @@ HABILLAGE_CSS = """
   justify-content: center; gap: 18px; padding: 0 36px; transition: opacity 0.4s; }
 #video-carte[hidden] { display: flex !important; opacity: 0; pointer-events: none; }
 #video-carte .filet-carte { width: 64px; height: 4px; background: var(--red); }
-#video-carte h1 { font-size: 2.3rem; }
+#video-carte h1 { font-size: 1.95rem; line-height: 1.12; }
 #video-carte p { font-size: 17px; color: var(--text-secondary); margin: 0; line-height: 1.5; }
 #video-carte .petit { font-size: 12px; color: var(--text-muted); }
 /* Dans la vidéo, les courbes tiennent dans la largeur de l'écran */
@@ -120,8 +120,8 @@ async def main():
 
         # 1. Carte de titre
         await carte("""<div class="filet-carte"></div>
-          <h1>L'abstention peut-elle changer le second tour&nbsp;?</h1>
-          <p>Un outil pour mesurer ce que pèse l'abstention de chaque génération dans la présidentielle 2027.</p>""")
+          <h1>Jeunesse, vieillesse, abstention&nbsp;: comment l'abstention différenciée des générations pèse-t-elle sur les élections&nbsp;?</h1>
+          <p>Une jeunesse réputée progressiste, une vieillesse présentée comme conservatrice : mesurez ce que change la mobilisation de chaque génération, en 2022, en 2024 et pour 2027.</p>""")
         await pause(3.2)
         await carte("")
         await pause(0.5)
@@ -184,8 +184,8 @@ async def main():
 
         # Image de couverture, prise sur la carte de titre
         await carte("""<div class="filet-carte"></div>
-          <h1>L'abstention peut-elle changer le second tour&nbsp;?</h1>
-          <p>Un outil pour mesurer ce que pèse l'abstention de chaque génération dans la présidentielle 2027.</p>""")
+          <h1>Jeunesse, vieillesse, abstention&nbsp;: comment l'abstention différenciée des générations pèse-t-elle sur les élections&nbsp;?</h1>
+          <p>Une jeunesse réputée progressiste, une vieillesse présentée comme conservatrice : mesurez ce que change la mobilisation de chaque génération, en 2022, en 2024 et pour 2027.</p>""")
         await pause(0.6)
         await page.screenshot(path=str(SORTIE / "couverture_linkedin.png"))
 
