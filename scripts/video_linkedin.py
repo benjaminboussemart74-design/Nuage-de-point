@@ -109,6 +109,9 @@ async def main():
             return x, y
 
         async def cliquer(selecteur):
+            # Sur téléphone, les scénarios défilent dans une rangée : on amène le bouton à l'écran.
+            await page.evaluate("s => document.querySelector(s).scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' })", selecteur)
+            await pause(0.4)
             await viser(selecteur)
             await page.evaluate("() => document.getElementById('video-curseur').classList.add('clic')")
             await page.locator(selecteur).first.click()
@@ -128,26 +131,26 @@ async def main():
 
         # 2. Point de départ : le sondage
         await defiler("#sim-label")
-        await legende("Point de départ : le sondage Ipsos-CEVIPOF de septembre 2026, 13 060 inscrits")
+        await legende("Point de départ : le sondage Odoxa-Backbone d'octobre 2026, 12 005 personnes")
         await pause(3.0)
 
         # 3. Scénarios prêts à l'emploi
         await legende("1. Choisissez un scénario")
         await defiler("#scenarios")
         await cliquer('[data-scenario="jeunes-participent"]')
-        await legende("Moins d'abstention : les moins de 35 ans votent autant que les 60-69 ans…")
+        await legende("Moins d'abstention : les moins de 35 ans votent autant que les 65-74 ans…")
         await pause(0.6)
         await defiler("#sim-liste")
-        await legende("Mélenchon gagne un point et se rapproche du second tour")
+        await legende("Mélenchon creuse l'écart sur Philippe pour la qualification")
         await pause(3.2)
 
         await legende("1. Choisissez un scénario")
         await defiler("#scenarios")
-        await cliquer('[data-scenario="aines-comme-jeunes"]')
-        await legende("Les 60 ans et plus s'abstiennent et votent comme les 25-34 ans…")
+        await cliquer('[data-scenario="jeunes-choisissent-aines"]')
+        await legende("Les moins de 35 ans votent comme les 75 ans et plus…")
         await pause(0.6)
         await defiler("#sim-titre")
-        await legende("… et le second tour change d'affiche")
+        await legende("… et Philippe prend la place de Mélenchon au second tour")
         await pause(3.4)
 
         # 4. Réglage à la main d'une tranche d'âge
@@ -168,10 +171,10 @@ async def main():
         await legende("3. Comparez les électorats par âge")
         await defiler("#courbes-cles")
         await cliquer('[data-cle="melenchon"]')
-        await legende("Mélenchon : 41 % chez les 18-24 ans, 4 % chez les 70 ans et plus")
+        await legende("Mélenchon : 44 % chez les 18-24 ans, 7 % chez les 75 ans et plus")
         await pause(3.0)
         await cliquer('[data-cle="philippe"]')
-        await legende("Philippe : l'inverse, son électorat vieillit")
+        await legende("Philippe : l'inverse, de 14 % à 28 %")
         await pause(3.0)
 
         # 6. Carte de fin
@@ -179,7 +182,7 @@ async def main():
         await carte("""<div class="filet-carte"></div>
           <h1>À vous de jouer</h1>
           <p>Faites voter ou s'abstenir chaque génération, et voyez qui se qualifierait au second tour.</p>
-          <p class="petit">Sources : Ipsos bva - CEVIPOF, Enquête électorale française 2026 ; Ipsos, Sociologie des électorats 2022 et 2024 ; INSEE ; ministère de l'Intérieur. Simulation à titre indicatif.</p>""")
+          <p class="petit">Sources : Odoxa-Backbone, intentions de vote pour 2027 (octobre 2026) ; Ipsos, Sociologie des électorats 2022 et 2024 ; INSEE ; ministère de l'Intérieur. Simulation à titre indicatif.</p>""")
         await pause(3.5)
 
         # Image de couverture, prise sur la carte de titre

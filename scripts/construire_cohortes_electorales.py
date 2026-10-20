@@ -20,11 +20,10 @@ Sources Ipsos, transcrites à la main dans data/cohortes/ :
    1er tour de la présidentielle 2022 et européennes 2024), avec les résultats officiels.
 6. participation_par_age_ipsos.csv : participation par tranche d'âge, utilisée pour 2024,
    faute d'enquête de l'INSEE sur ce scrutin.
-7. Présidentielle 2027 (lignes « 2027 » de vote_par_age_ipsos.csv) : intentions de vote au 1er tour,
-   hypothèse Glucksmann-Philippe, de l'Enquête électorale française 2026, vague 3
-   (Ipsos bva - CESI pour le CEVIPOF, la Fondation Jean-Jaurès, l'Institut Montaigne et Le Monde,
-   13 060 inscrits interrogés du 3 au 9 septembre 2026, 9 327 exprimés certains d'aller voter).
-   La colonne « officiel » reprend alors l'intention de vote d'ensemble du sondage.
+7. vote_par_age_odoxa_2027.csv : intentions de vote au 1er tour de la présidentielle 2027,
+   hypothèse Édouard Philippe candidat, par tranche d'âge (Odoxa-Backbone pour la Presse régionale,
+   Public Sénat et Le Nouvel Obs, 12 005 personnes interrogées du 24 septembre au 7 octobre 2026).
+   La colonne « officiel » reprend l'intention de vote d'ensemble du sondage.
 
 Utilisation :
     python scripts/construire_cohortes_electorales.py
@@ -42,6 +41,7 @@ DOSSIER_BRUT = RACINE / "data" / "brut" / "telechargements" / "insee_cohortes"
 DOSSIER_COHORTES = RACINE / "data" / "cohortes"
 FICHIER_SORTIE = DOSSIER_COHORTES / "cohortes_electorales.json"
 FICHIER_VOTE_IPSOS = DOSSIER_COHORTES / "vote_par_age_ipsos.csv"
+FICHIER_VOTE_2027 = DOSSIER_COHORTES / "vote_par_age_odoxa_2027.csv"
 FICHIER_PARTICIPATION_IPSOS = DOSSIER_COHORTES / "participation_par_age_ipsos.csv"
 # Copie des mêmes données, chargée directement par la page de l'application.
 FICHIER_APPLICATION = RACINE / "cohortes-presidentielle" / "donnees.js"
@@ -65,6 +65,18 @@ TRANCHES_REU = [(18, 24), (25, 39), (40, 54), (55, 64), (65, 79), (80, 200)]
 # Tranches d'âge des enquêtes Ipsos.
 TRANCHES_IPSOS = [(18, 24), (25, 34), (35, 49), (50, 59), (60, 69), (70, 200)]
 COLONNES_IPSOS = ["18-24", "25-34", "35-49", "50-59", "60-69", "70+"]
+
+# Chaque sondage a ses propres tranches d'âge.
+SONDAGES = {
+    "2022": (FICHIER_VOTE_IPSOS, TRANCHES_IPSOS, COLONNES_IPSOS),
+    "2024": (FICHIER_VOTE_IPSOS, TRANCHES_IPSOS, COLONNES_IPSOS),
+    "2027": (FICHIER_VOTE_2027, [(18, 24), (25, 34), (35, 49), (50, 64), (65, 74), (75, 200)],
+             ["18-24", "25-34", "35-49", "50-64", "65-74", "75+"]),
+}
+
+
+def nom_tranche(t):
+    return f"{t[0]} ans et plus" if t[1] >= 200 else f"{t[0]}-{t[1]} ans"
 
 
 def telecharger():
@@ -199,15 +211,16 @@ def simulation(election, lignes_election):
     (méthode du calage itératif) pour que, avec les votants estimés de chaque tranche, on retrouve
     exactement les résultats officiels, tout en gardant la composition du vote de chaque tranche.
     """
-    with open(FICHIER_VOTE_IPSOS, encoding="utf-8") as f:
+    fichier, tranches, colonnes = SONDAGES[election]
+    with open(fichier, encoding="utf-8") as f:
         candidats = [l for l in csv.DictReader(f, delimiter=";") if l["election"] == election]
     votants = [sum(l["population"] * l["inscription"] * l["t1"] for l in lignes_election if T[0] <= l["age"] <= T[1])
-               for T in TRANCHES_IPSOS]
+               for T in tranches]
     total = sum(votants)
     officiel = [float(c["officiel"]) for c in candidats]
     officiel = [o / sum(officiel) for o in officiel]
     # Matrice des voix : une ligne par candidat, une colonne par tranche d'âge.
-    voix = [[max(float(c[col]), 0.2) / 100 * v for col, v in zip(COLONNES_IPSOS, votants)] for c in candidats]
+    voix = [[max(float(c[col]), 0.2) / 100 * v for col, v in zip(colonnes, votants)] for c in candidats]
     for _ in range(200):
         for i, ligne in enumerate(voix):
             facteur = officiel[i] * total / sum(ligne)
@@ -217,12 +230,12 @@ def simulation(election, lignes_election):
             for ligne in voix:
                 ligne[j] *= facteur
     return {
-        "tranches": ["18-24 ans", "25-34 ans", "35-49 ans", "50-59 ans", "60-69 ans", "70 ans et plus"],
-        "bornes": [[T[0], T[1]] for T in TRANCHES_IPSOS],
+        "tranches": [nom_tranche(T) for T in tranches],
+        "bornes": [[T[0], T[1]] for T in tranches],
         "candidats": [{
             "id": c["id"], "nom": c["candidat"], "etiquette": c["etiquette"],
             "officiel": round(o, 5),
-            "ipsos": [float(c[col]) / 100 for col in COLONNES_IPSOS],
+            "ipsos": [float(c[col]) / 100 for col in colonnes],
             "parTranche": [round(voix[i][j] / votants[j], 5) for j in range(len(votants))],
         } for i, (c, o) in enumerate(zip(candidats, officiel))],
     }
