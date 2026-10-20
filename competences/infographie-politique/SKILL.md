@@ -127,6 +127,7 @@ En-tête de 48px, gouttière latérale d'au moins 16px (`padding-left: max(16px,
 - **Timeline législative** : ligne verticale de 1px, points de 10px colorés selon l'état (fait : vert ; en cours : accent ; à venir : bordure).
 - **Encart d'alerte** : fond clair et filet gauche de 3px dans la couleur sémantique (ambre, rouge, vert, accent).
 - **Carte électorale** : SVG des contours projetés, traits fins dans la couleur du fond pour séparer les unités, limites communales en trait plus foncé. Toujours une fiche de détail au survol et au toucher.
+- **Point info** (à la place d'une section « Méthode » en bas de page) : un « i » cerclé suivi d'une question simple (« D'où vient le point de départ ? », « Comment ce score est-il calculé ? »), placé juste sous l'élément qu'il explique. Il déplie un encadré qui donne, dans cet ordre : l'explication en langage courant, un exemple de calcul avec de vrais chiffres, les limites, puis la source précise. Utiliser `<details>` et `<summary>` : accessible au clavier, sans script.
 - **Barre de source** : toujours en pied de page, au format `Source : [organisme] via [canal] — [mention]`, crédits photo compris.
 
 ## Conventions éditoriales
@@ -136,6 +137,7 @@ En-tête de 48px, gouttière latérale d'au moins 16px (`padding-left: max(16px,
 - **Sigles** : capitales sans points (SNBC, PPE, RN, LFI).
 - **Chiffres** : espace insécable comme séparateur de milliers (« 1 247 communes »), virgule décimale (« 32,4 % »), espace insécable avant « % ». Les écarts de pourcentages s'écrivent en points (« +2,1 pts »).
 - **Vocabulaire électoral précis** : « participation » ou « mobilisation » pour la part d'inscrits qui votent ; « choix des candidats » ou « vote » pour la répartition des voix. Ne jamais employer « voter comme » quand on ne précise pas lequel des deux on vise.
+- **Ton** : écrire comme on l'expliquerait à un voisin curieux, à la deuxième personne quand le lecteur agit (« faites voter davantage une génération »). Pas de jargon sans traduction immédiate (« calage itératif » vient après l'explication, jamais avant).
 - **Titres** : affirmatifs ou interrogatifs, jamais descriptifs (« Qui va gagner le second tour ? » plutôt que « Résultats de la simulation »).
 - **Neutralité** : même traitement graphique et rédactionnel pour toutes les forces politiques ; les estimations sont présentées avec leurs marges d'erreur.
 
