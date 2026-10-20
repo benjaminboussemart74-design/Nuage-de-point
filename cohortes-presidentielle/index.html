@@ -174,6 +174,9 @@ h3 { font-weight: 700; font-size: 1.15rem; line-height: 1.2; }
 .trace .etiquette-fin tspan.v { font-family: var(--font-mono); font-weight: 600; fill: var(--text-secondary); }
 .trace .viseur { stroke: var(--border-dark); stroke-width: 1; }
 .trace .titre-bande { font-size: 11.5px; font-weight: 600; fill: var(--text-secondary); }
+.trace.compacte text { font-size: 13px; }
+.trace.compacte .valeur-axe, .trace.compacte .valeur-barre { font-size: 12px; }
+.trace.compacte .etiquette-fin { font-size: 13.5px; }
 .trace .valeur-barre { font-family: var(--font-mono); font-size: 11px; font-weight: 600; fill: var(--text); }
 .bulle-courbes { position: absolute; pointer-events: none; background: var(--bg-card); border: 1px solid var(--border-dark); padding: 8px 10px; font-size: 12px; min-width: 180px; z-index: 5; }
 .bulle-courbes .titre { font-weight: 600; margin: 0 0 4px; }
@@ -247,6 +250,7 @@ h3 { font-weight: 700; font-size: 1.15rem; line-height: 1.2; }
 .age:first-of-type { border-top: 1px solid var(--border-dark); }
 .age .tranche { font-weight: 600; font-size: 12.5px; line-height: 1.2; }
 .age output { font-family: var(--font-mono); font-weight: 600; font-size: 13px; text-align: right; }
+.age .sous span { white-space: nowrap; }
 .age .sous { grid-column: 2 / 4; display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 11px; color: var(--text-muted); }
 .age select {
   font-family: var(--font-sans); font-size: 11.5px; color: var(--text); background: var(--bg-card);
@@ -315,6 +319,63 @@ tr.total td { font-weight: 700; border-bottom: 0; }
 
 @media (prefers-reduced-motion: reduce) { .piste .rempli, .piste .officiel, .halt .segment, .halt .point { transition: none; } }
 
+/* ── Interface : en-tête translucide, défilement doux, retours au toucher ── */
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+section[id], #sim-tete, #sim-ages { scroll-margin-top: 72px; }
+.entete, body::before { background: color-mix(in srgb, var(--bg-card) 86%, transparent); -webkit-backdrop-filter: saturate(1.4) blur(12px); backdrop-filter: saturate(1.4) blur(12px); }
+button { -webkit-tap-highlight-color: transparent; }
+.puces button, .bascule button, .cles button { transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.1s; }
+.puces button:active, .bascule button:active { transform: scale(0.97); }
+
+/* Choix du scrutin : l'année en avant, le type de scrutin en second */
+.scrutins button b { font-family: var(--font-mono); font-weight: 700; }
+.scrutins button span { font-weight: 400; }
+
+/* Scénarios : une rangée de puces par groupe */
+.groupe-scenarios { display: flex; flex-direction: column; align-items: stretch; gap: 6px; }
+.rail { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* Curseurs : la partie déjà parcourue est remplie */
+input[type="range"]::-webkit-slider-runnable-track { background: linear-gradient(to right, var(--accent) var(--remplissage, 50%), var(--border-mid) var(--remplissage, 50%)); }
+input[type="range"]::-moz-range-progress { height: 3px; background: var(--accent); }
+
+/* Barre de résultat fixée en bas de l'écran (téléphone et tablette) */
+.barre-resultat { display: none; }
+@media (max-width: 960px) {
+  .barre-resultat {
+    display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px;
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 8;
+    padding: 8px max(16px, env(safe-area-inset-right, 0px)) calc(8px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+    background: color-mix(in srgb, var(--bg-card) 90%, transparent); -webkit-backdrop-filter: saturate(1.4) blur(12px); backdrop-filter: saturate(1.4) blur(12px);
+    border-top: 1px solid var(--border-dark);
+    transform: translateY(105%); transition: transform 0.2s ease-out;
+  }
+  .barre-resultat.visible { transform: none; }
+  .barre-resultat .qui-passe { display: flex; gap: 12px; min-width: 0; overflow: hidden; }
+  .barre-resultat .candidat { display: grid; grid-template-columns: 30px auto; gap: 7px; align-items: center; min-width: 0; }
+  .barre-resultat .candidat .portrait { width: 30px; height: 30px; }
+  .barre-resultat .candidat i { width: 30px; height: 30px; background: var(--couleur); display: block; }
+  .barre-resultat .candidat span { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
+  .barre-resultat .candidat small { font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .barre-resultat .candidat b { font-family: var(--font-mono); font-size: 15px; font-weight: 700; border-bottom: 2px solid var(--couleur); }
+  .barre-resultat .voir { font-size: 12px; font-weight: 600; color: var(--accent); background: none; border: 1px solid var(--border-mid); border-radius: 2px; padding: 7px 10px; cursor: pointer; white-space: nowrap; }
+  #simulateur { padding-bottom: 8px; }
+}
+
+/* Écrans tactiles : cibles plus grandes */
+@media (pointer: coarse) {
+  .curseur { height: 32px; }
+  .curseur .repere { top: 10px; }
+  input[type="range"] { height: 32px; }
+  input[type="range"]::-webkit-slider-runnable-track { height: 4px; }
+  input[type="range"]::-webkit-slider-thumb { width: 24px; height: 24px; margin-top: -10px; }
+  input[type="range"]::-moz-range-thumb { width: 24px; height: 24px; }
+  .puces button, .bascule button { min-height: 40px; }
+  .age select { min-height: 34px; font-size: 13px; }
+  .bascule button:not([aria-pressed="true"]):hover { background: transparent; color: var(--text-secondary); }
+}
+
 @media (max-width: 960px) {
   .ouverture { grid-template-columns: 1fr; gap: 28px; padding-block: 32px 28px; }
   .simulateur { grid-template-columns: 1fr; }
@@ -337,6 +398,23 @@ tr.total td { font-weight: 700; border-bottom: 0; }
   .generations .generation:first-child { grid-column: span 2; }
   .commande { flex-direction: column; align-items: stretch; }
   .bascule { display: grid; grid-auto-columns: 1fr; }
+  .scrutins button { display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 8px 6px; }
+  .scrutins button b { font-size: 16px; }
+  .scrutins button span { font-size: 11px; line-height: 1.2; }
+  /* Scénarios : une rangée qui défile au doigt, au lieu d'une pile de boutons */
+  .rail { flex-wrap: nowrap; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none;
+    margin-inline: calc(-1 * max(16px, env(safe-area-inset-left, 0px))); padding-inline: max(16px, env(safe-area-inset-left, 0px));
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 12px, #000 calc(100% - 24px), transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0, #000 12px, #000 calc(100% - 24px), transparent 100%); }
+  .rail::-webkit-scrollbar { display: none; }
+  .rail button { flex: 0 0 auto; max-width: 78%; text-align: left; white-space: normal; scroll-snap-align: start; }
+  /* Réglages par âge : le curseur sur une ligne, le menu sur la suivante */
+  .age { grid-template-columns: 66px minmax(0, 1fr) 44px; gap: 6px 10px; }
+  .age .sous { grid-column: 1 / -1; }
+  .age .sous span { white-space: nowrap; }
+  .age select { flex: 1; min-width: 0; max-width: none; }
+  .figure-courbes svg.trace.compacte { min-width: 0; }
+  h1 { font-size: 1.7rem; }
   .section { padding-block: 40px 4px; }
 }
 </style>
@@ -382,10 +460,10 @@ tr.total td { font-weight: 700; border-bottom: 0; }
     <!-- Simulateur -->
     <section id="simulateur" aria-label="Simulateur">
       <div class="commande">
-        <div class="bascule" role="group" aria-label="Scrutin">
-          <button type="button" data-sim-election="2027">Présidentielle 2027 · sondage</button>
-          <button type="button" data-sim-election="2022">Présidentielle 2022 · 1er tour</button>
-          <button type="button" data-sim-election="2024">Européennes 2024</button>
+        <div class="bascule scrutins" role="group" aria-label="Scrutin">
+          <button type="button" data-sim-election="2027"><b>2027</b> <span>présidentielle · sondage</span></button>
+          <button type="button" data-sim-election="2022"><b>2022</b> <span>présidentielle · 1er tour</span></button>
+          <button type="button" data-sim-election="2024"><b>2024</b> <span>européennes</span></button>
         </div>
         <div class="puces" id="scenarios" role="group" aria-label="Scénarios"></div>
       </div>
@@ -452,6 +530,7 @@ tr.total td { font-weight: 700; border-bottom: 0; }
           </div>
         </div>
       </div>
+      <div class="barre-resultat" id="barre-resultat" aria-live="polite"></div>
     </section>
 
     <!-- Courbes du vote par âge -->
@@ -587,6 +666,23 @@ const millions = x => nombre(x / 1e6, 1) + NBSP + 'million' + (x >= 2e6 ? 's' : 
 const entier = x => Math.round(x).toLocaleString('fr-FR').replace(/ /g, NBSP);
 const somme = (liste, f) => liste.reduce((s, x) => s + f(x), 0);
 
+// Les chiffres glissent vers leur nouvelle valeur (0,45 s), sauf si le visiteur a demandé moins d'animations.
+const ANIMER = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function animerNombre(el, valeur, format) {
+  const depart = el._valeur ?? valeur;
+  el._valeur = valeur;
+  cancelAnimationFrame(el._anim);
+  if (!ANIMER || Math.abs(valeur - depart) < 1e-6) { el.textContent = format(valeur); return; }
+  const debut = performance.now();
+  const pas = t => {
+    const k = Math.min(1, (t - debut) / 450), e = 1 - Math.pow(1 - k, 3);
+    el.textContent = format(depart + (valeur - depart) * e);
+    if (k < 1) el._anim = requestAnimationFrame(pas);
+  };
+  el._anim = requestAnimationFrame(pas);
+}
+const scoresPrecedents = {};
+
 /* ───────────── Simulateur ───────────── */
 
 const sim = { election: '2027', participation: [], comme: [], scenario: 'reel' };
@@ -650,16 +746,16 @@ function scores(election, participation, comme) {
 function construireReglages() {
   const t = tranchesReelles(sim.election);
   document.getElementById('scenarios').innerHTML = Object.entries(GROUPES_SCENARIOS).map(([groupe, titre]) =>
-    '<div class="groupe-scenarios" role="group" aria-label="' + titre + '"><p class="label">' + titre + '</p>' +
+    '<div class="groupe-scenarios" role="group" aria-label="' + titre + '"><p class="label">' + titre + '</p><div class="rail">' +
       SCENARIOS.filter(s => s.groupe === groupe).map(s => '<button type="button" data-scenario="' + s.id + '">' + (s.id === 'reel' ? SCRUTINS[sim.election].reference : s.nom) + '</button>').join('') +
-    '</div>').join('');
+    '</div></div>').join('');
   document.getElementById('sim-ages').innerHTML = t.map((x, j) =>
     '<div class="age" id="age-' + j + '">' +
       '<label class="tranche" for="sim-p-' + j + '">' + x.nom.replace(' et plus', '&nbsp;et&nbsp;+') + '</label>' +
       '<div class="curseur"><span class="repere" style="left:calc(7px + (100% - 14px) * ' + x.participation + ')"></span>' +
         '<input type="range" id="sim-p-' + j + '" min="0" max="100" step="1" aria-label="Participation des ' + x.nom + '"></div>' +
       '<output id="sim-p-' + j + '-val" for="sim-p-' + j + '"></output>' +
-      '<div class="sous"><span>' + (SCRUTINS[sim.election].futur ? 'comme en 2022 : ' : 'réel ') + pct(x.participation, 0) + '</span>' +
+      '<div class="sous"><span>' + (SCRUTINS[sim.election].futur ? 'départ (2022) : ' : 'réel ') + pct(x.participation, 0) + '</span>' +
         '<select id="sim-c-' + j + '" aria-label="Choix de vote des ' + x.nom + '">' +
           t.map((y, k) => '<option value="' + k + '">' + (k === j ? 'ses propres choix de candidats' : 'choisit comme les ' + y.nom) + '</option>').join('') +
         '</select></div>' +
@@ -717,7 +813,7 @@ function rendreSimu() {
       '<span class="rang">' + rang(i) + '</span>' +
       '<div class="identite' + (PORTRAITS[x.id] ? '' : ' sans-photo') + '">' + portrait(x.id) +
         '<span><span class="nom">' + x.nom + '</span><span class="parti">' + x.etiquette + '</span></span></div>' +
-      '<span class="score">' + pct(x.score) + '</span>' +
+      '<span class="score" data-id="' + x.id + '">' + pct(scoresPrecedents[x.id] ?? x.score) + '</span>' +
       '<span class="delta">' + scrutin.court + ' ' + pct(officiel[x.id]) + ' · ' + pts(x.score - officiel[x.id]) + '</span>' +
     '</div>').join('');
 
@@ -732,7 +828,7 @@ function rendreSimu() {
     ligne.segment.style.left = Math.min(a, b) + '%';
     ligne.segment.style.width = Math.abs(b - a) + '%';
     const ecart = x.score - officiel[x.id];
-    ligne.val.textContent = pct(x.score);
+    animerNombre(ligne.val, x.score, v => pct(v));
     ligne.ecart.textContent = (ecart > 0.0005 ? '▲ ' : ecart < -0.0005 ? '▼ ' : '') + pts(ecart);
     ligne.ecart.className = 'ecart' + (Math.abs(ecart) < 0.0005 ? ' nul' : ecart > 0 ? ' hausse' : ' baisse');
   });
@@ -744,6 +840,21 @@ function rendreSimu() {
     document.getElementById('age-' + j).classList.toggle('modifiee', Math.abs(sim.participation[j] - x.participation) > 0.004 || sim.comme[j] !== j);
   });
   document.getElementById('sim-total').textContent = pct(simule.total / inscrits);
+  zoneTete.querySelectorAll('.score').forEach(el => {
+    const c = simule.candidats.find(x => x.id === el.dataset.id);
+    el._valeur = scoresPrecedents[c.id] ?? c.score;
+    animerNombre(el, c.score, v => pct(v));
+  });
+  simule.candidats.forEach(c => { scoresPrecedents[c.id] = c.score; });
+  t.forEach((_, j) => document.getElementById('sim-p-' + j).style.setProperty('--remplissage', Math.round(sim.participation[j] * 100) + '%'));
+
+  // Barre de résultat fixée en bas de l'écran
+  document.getElementById('barre-resultat').innerHTML =
+    '<div class="qui-passe">' + tete.map(x =>
+      '<div class="candidat" style="--couleur:var(--c-' + COULEURS[x.id] + ')">' + (portrait(x.id) || '<i></i>') +
+        '<span><small>' + x.nom.split(' ').slice(1).join(' ') + '</small><b>' + pct(x.score) + '</b></span></div>').join('') +
+    '</div><button type="button" class="voir" id="voir-resultat">Détail</button>';
+  document.getElementById('voir-resultat').addEventListener('click', () => document.getElementById('sim-tete').scrollIntoView({ block: 'start' }));
   document.getElementById('sim-total-reel').textContent = '· réelle ' + pct(reel.total / inscrits);
   document.querySelectorAll('[data-scenario]').forEach(btn => btn.setAttribute('aria-pressed', btn.dataset.scenario === sim.scenario));
   document.querySelectorAll('[data-sim-election]').forEach(btn => btn.setAttribute('aria-pressed', btn.dataset.simElection === sim.election));
@@ -947,7 +1058,13 @@ function rendreCourbes() {
   const series = seriesCourbes(election);
   const tranches = tranchesReelles(election);
   const svg = document.getElementById('trace-courbes');
-  const W = 780, G = 46, D = 190, HAUT = 18, BAS = 300, AXE = 326, BANDE_HAUT = 362, BANDE_BAS = 440;
+  // Sur un écran étroit, le graphique est redessiné plus serré, avec des textes plus grands.
+  const compacte = document.getElementById('figure-courbes').clientWidth < 600;
+  courbes.compacte = compacte;
+  const W = compacte ? 470 : 780, G = compacte ? 34 : 46, D = compacte ? 152 : 190;
+  const HAUT = 18, BAS = 300, AXE = 326, BANDE_HAUT = 362, BANDE_BAS = 440;
+  svg.setAttribute('viewBox', '0 0 ' + W + ' 470');
+  svg.classList.toggle('compacte', compacte);
   const pas = (W - G - D) / (S.tranches.length - 1);
   const x = j => G + j * pas;
   const yMax = Math.ceil(Math.max(...series.flatMap(s => s.valeurs)) * 10) / 10;
@@ -963,7 +1080,7 @@ function rendreCourbes() {
     el('text', { x: G - 8, y: y(v) + 3, 'text-anchor': 'end', class: 'valeur-axe' }).textContent = nombre(v * 100, 0) + NBSP + '%';
   }
   S.tranches.forEach((t, j) => {
-    el('text', { x: x(j), y: AXE, 'text-anchor': 'middle', class: 'tranche-axe' }).textContent = t.replace(' et plus', ' et +');
+    el('text', { x: x(j), y: AXE, 'text-anchor': 'middle', class: 'tranche-axe' }).textContent = compacte ? t.replace(' ans', '').replace(' et plus', '+') : t.replace(' et plus', ' et +');
   });
 
   // Courbes, points, zones de survol de chaque série
@@ -992,8 +1109,9 @@ function rendreCourbes() {
     el('line', { x1: x0 - 8, x2: x0 - 2, y1: f.cible, y2: f.y, stroke: 'var(--border-mid)' }, g);
     let xt = x0;
     if (PORTRAITS[f.s.id]) {
-      el('image', { href: 'portraits/' + f.s.id + '.jpg', x: x0, y: f.y - 12, width: 24, height: 24 }, g);
-      xt = x0 + 30;
+      const cote = compacte ? 20 : 24;
+      el('image', { href: 'portraits/' + f.s.id + '.jpg', x: x0, y: f.y - cote / 2, width: cote, height: cote }, g);
+      xt = x0 + cote + 6;
     }
     const t = el('text', { x: xt, y: f.y + 4, class: 'etiquette-fin' }, g);
     t.textContent = f.s.court + ' ';
@@ -1002,11 +1120,11 @@ function rendreCourbes() {
   });
 
   // Bande de participation, sur le même axe des âges
-  el('text', { x: G, y: BANDE_HAUT - 12, class: 'titre-bande' }).textContent = 'Participation des inscrits de chaque tranche';
+  el('text', { x: G, y: BANDE_HAUT - 12, class: 'titre-bande' }).textContent = compacte ? 'Participation des inscrits' : 'Participation des inscrits de chaque tranche';
   el('line', { x1: G, x2: W - D + 8, y1: BANDE_BAS, y2: BANDE_BAS, stroke: 'var(--border-dark)' });
   tranches.forEach((t, j) => {
     const h = (BANDE_BAS - BANDE_HAUT) * t.participation;
-    el('rect', { x: x(j) - 17, y: BANDE_BAS - h, width: 34, height: h, fill: 'var(--text-muted)' });
+    el('rect', { x: x(j) - (compacte ? 13 : 17), y: BANDE_BAS - h, width: compacte ? 26 : 34, height: h, fill: 'var(--text-muted)' });
     el('text', { x: x(j), y: BANDE_BAS - h - 5, 'text-anchor': 'middle', class: 'valeur-barre' }).textContent = pct(t.participation, 0);
   });
 
@@ -1085,6 +1203,23 @@ document.querySelectorAll('[data-sim-election]').forEach(btn => btn.addEventList
 }));
 document.getElementById('sim-reinit').addEventListener('click', () => { appliquerScenario('reel'); rendreSimu(); });
 document.querySelectorAll('[data-election]').forEach(btn => btn.addEventListener('click', () => { poids.election = btn.dataset.election; rendrePoids(); }));
+
+// La barre de résultat apparaît quand on est dans le simulateur mais que le podium est hors de l'écran.
+const visibilite = { simulateur: false, tete: true };
+const observateur = new IntersectionObserver(entrees => {
+  entrees.forEach(e => { visibilite[e.target.id === 'simulateur' ? 'simulateur' : 'tete'] = e.isIntersecting; });
+  document.getElementById('barre-resultat').classList.toggle('visible', visibilite.simulateur && !visibilite.tete);
+}, { threshold: 0 });
+observateur.observe(document.getElementById('simulateur'));
+observateur.observe(document.getElementById('sim-tete'));
+
+let attenteRedimension;
+window.addEventListener('resize', () => {
+  clearTimeout(attenteRedimension);
+  attenteRedimension = setTimeout(() => {
+    if ((document.getElementById('figure-courbes').clientWidth < 600) !== courbes.compacte) rendreCourbes();
+  }, 150);
+});
 
 rendreOuverture();
 construireReglages();

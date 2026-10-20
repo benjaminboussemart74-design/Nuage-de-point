@@ -119,6 +119,13 @@ En-tête de 52px sur `--bg-card`, filet rouge de 3px, puis soit une colonne édi
 
 En-tête de 48px, gouttière latérale d'au moins 16px (`padding-left: max(16px, env(safe-area-inset-left, 0px))`), tout sur une colonne. Une barre d'onglets en bas seulement si la page a plusieurs vues distinctes. Aucun défilement horizontal de la page ; seuls les tableaux et graphiques larges défilent dans leur propre conteneur.
 
+Pour un outil interactif sur téléphone :
+- **Garder le résultat visible.** Quand les réglages sont loin du résultat, une barre fixée en bas de l'écran (translucide, filet supérieur) rappelle le résultat principal et apparaît seulement quand le résultat complet est hors de l'écran.
+- **Des rangées de choix qui défilent au doigt** (`overflow-x: auto`, `scroll-snap-type`) plutôt qu'une pile de boutons.
+- **Des cibles adaptées au toucher** sous `@media (pointer: coarse)` : curseurs de 24 px, boutons d'au moins 40 px de haut, pas d'état de survol qui reste affiché.
+- **Des graphiques redessinés pour la largeur**, avec des textes plus grands, au lieu d'un graphique d'ordinateur qu'il faut faire glisser.
+- **Des chiffres qui glissent vers leur nouvelle valeur** (0,4 s environ), désactivés si le visiteur a demandé moins d'animations.
+
 ## Composants de référence
 
 - **Barres horizontales** : hauteur 6px, piste `--bg-sidebar`, remplissage dans la couleur partisane ; nom à gauche (DM Sans 500, 12px), valeur à droite (JetBrains Mono 600, 12px). Un trait vertical fin marque la valeur de référence (résultat officiel, moyenne).
