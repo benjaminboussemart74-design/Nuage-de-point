@@ -120,8 +120,8 @@ async def main():
 
         # 1. Carte de titre
         await carte("""<div class="filet-carte"></div>
-          <h1>Et si les jeunes votaient autant que leurs aînés&nbsp;?</h1>
-          <p>Un simulateur de la présidentielle 2027 : changez la participation et le vote de chaque génération, et regardez le résultat bouger.</p>""")
+          <h1>L'abstention peut-elle changer le second tour&nbsp;?</h1>
+          <p>Un outil pour mesurer ce que pèse l'abstention de chaque génération dans la présidentielle 2027.</p>""")
         await pause(3.2)
         await carte("")
         await pause(0.5)
@@ -135,23 +135,23 @@ async def main():
         await legende("1. Choisissez un scénario")
         await defiler("#scenarios")
         await cliquer('[data-scenario="jeunes-participent"]')
-        await legende("Les moins de 35 ans votent autant que les 60-69 ans…")
+        await legende("Moins d'abstention : les moins de 35 ans votent autant que les 60-69 ans…")
         await pause(0.6)
         await defiler("#sim-liste")
-        await legende("Les points pleins glissent : Mélenchon gagne un point")
+        await legende("Mélenchon gagne un point et se rapproche du second tour")
         await pause(3.2)
 
         await legende("1. Choisissez un scénario")
         await defiler("#scenarios")
         await cliquer('[data-scenario="aines-comme-jeunes"]')
-        await legende("Les 60 ans et plus votent comme les 25-34 ans…")
+        await legende("Les 60 ans et plus s'abstiennent et votent comme les 25-34 ans…")
         await pause(0.6)
         await defiler("#sim-titre")
         await legende("… et le second tour change d'affiche")
         await pause(3.4)
 
         # 4. Réglage à la main d'une tranche d'âge
-        await legende("2. Ou réglez chaque âge vous-même")
+        await legende("2. Ou réglez l'abstention de chaque âge")
         await cliquer('[data-scenario="reel"]')
         await defiler("#sim-ages")
         x, y = await viser("#sim-p-0")
@@ -159,7 +159,7 @@ async def main():
             await page.evaluate("v => { const i = document.getElementById('sim-p-0'); i.value = v; i.dispatchEvent(new Event('input', { bubbles: true })); }", valeur)
             await page.evaluate("v => { const c = document.getElementById('video-curseur'); const r = document.getElementById('sim-p-0').getBoundingClientRect(); c.style.left = (r.left + 7 + (r.width - 14) * v / 100) + 'px'; }", valeur)
             await pause(0.07)
-        await legende("Tous les 18-24 ans votent : 100 %")
+        await legende("Plus aucune abstention chez les 18-24 ans")
         await pause(1.4)
         await defiler("#sim-liste")
         await pause(2.6)
@@ -178,14 +178,14 @@ async def main():
         await legende("")
         await carte("""<div class="filet-carte"></div>
           <h1>À vous de jouer</h1>
-          <p>Choisissez un scénario, réglez chaque génération, et voyez qui se qualifierait au second tour.</p>
+          <p>Faites voter ou s'abstenir chaque génération, et voyez qui se qualifierait au second tour.</p>
           <p class="petit">Sources : Ipsos bva - CEVIPOF, Enquête électorale française 2026 ; Ipsos, Sociologie des électorats 2022 et 2024 ; INSEE ; ministère de l'Intérieur. Simulation à titre indicatif.</p>""")
         await pause(3.5)
 
         # Image de couverture, prise sur la carte de titre
         await carte("""<div class="filet-carte"></div>
-          <h1>Et si les jeunes votaient autant que leurs aînés&nbsp;?</h1>
-          <p>Un simulateur de la présidentielle 2027 : changez la participation et le vote de chaque génération, et regardez le résultat bouger.</p>""")
+          <h1>L'abstention peut-elle changer le second tour&nbsp;?</h1>
+          <p>Un outil pour mesurer ce que pèse l'abstention de chaque génération dans la présidentielle 2027.</p>""")
         await pause(0.6)
         await page.screenshot(path=str(SORTIE / "couverture_linkedin.png"))
 
