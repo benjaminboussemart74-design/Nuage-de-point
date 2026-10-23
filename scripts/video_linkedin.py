@@ -44,6 +44,7 @@ HABILLAGE_CSS = """
 #video-carte h1 { font-size: 1.95rem; line-height: 1.12; }
 #video-carte p { font-size: 17px; color: var(--text-secondary); margin: 0; line-height: 1.5; }
 #video-carte .petit { font-size: 12px; color: var(--text-muted); }
+#video-carte .grand { font-family: var(--font-serif); font-size: 1.55rem; line-height: 1.3; color: var(--text); font-weight: 700; letter-spacing: -0.01em; }
 /* Dans la vidéo, les courbes tiennent dans la largeur de l'écran */
 .figure-courbes svg.trace { min-width: 0 !important; }
 """
@@ -121,74 +122,105 @@ async def main():
         await cdp.send("Page.startScreencast", {"format": "jpeg", "quality": 92,
                                                 "maxWidth": LARGEUR * ECHELLE, "maxHeight": HAUTEUR * ECHELLE})
 
-        # 1. Carte de titre
+        async def glisser(i, de, a, pas_valeur=2):
+            """Fait glisser le curseur de participation de la tranche i, avec le curseur visible."""
+            await viser(f"#sim-p-{i}")
+            sens = 1 if a >= de else -1
+            for valeur in list(range(de, a, sens * pas_valeur)) + [a]:
+                await page.evaluate("([i, v]) => { const e = document.getElementById('sim-p-' + i); e.value = v; e.dispatchEvent(new Event('input', { bubbles: true }));"
+                                    " const c = document.getElementById('video-curseur'); const r = e.getBoundingClientRect(); c.style.left = (r.left + 12 + (r.width - 24) * v / 100) + 'px'; }", [i, valeur])
+                await pause(0.05)
+
+        async def choisir(i, valeur):
+            """Change le menu « pour qui votent-ils » de la tranche i."""
+            await viser(f"#sim-c-{i}")
+            await page.evaluate("() => document.getElementById('video-curseur').classList.add('clic')")
+            await page.evaluate("([i, v]) => { const e = document.getElementById('sim-c-' + i); e.value = v; e.dispatchEvent(new Event('change', { bubbles: true })); }", [i, valeur])
+            await pause(0.15)
+            await page.evaluate("() => document.getElementById('video-curseur').classList.remove('clic')")
+
+        async def scenario(selecteur, question, reponse):
+            """Choisit un scénario, puis montre le verdict et le podium."""
+            await legende(question)
+            await defiler("#scenarios")
+            await cliquer(selecteur)
+            await pause(0.4)
+            await defiler("#sim-label", 150)
+            await legende(reponse)
+            await pause(3.0)
+
+        # 1. Vos mots, en cartes de texte
         await carte("""<div class="filet-carte"></div>
-          <h1>Jeunesse, vieillesse, abstention&nbsp;: comment l'abstention différenciée des générations pèse-t-elle sur les élections&nbsp;?</h1>
-          <p>Une jeunesse réputée progressiste, une vieillesse présentée comme conservatrice : mesurez ce que change la mobilisation de chaque génération, en 2022, en 2024 et pour 2027.</p>""")
-        await pause(3.2)
+          <h1>Jeunesse, vieillesse, abstention&nbsp;: comment l'abstention différenciée pèse-t-elle sur le résultat des élections passées et à venir&nbsp;?</h1>""")
+        await pause(4.0)
+        await carte("""<div class="filet-carte"></div>
+          <p class="grand">La fracture entre une jeunesse réputée progressiste et une vieillesse présentée comme conservatrice est un lieu commun de la science politique.</p>""")
+        await pause(3.8)
+        await carte("""<div class="filet-carte"></div>
+          <p class="grand">À gauche comme à droite, les candidats ont volontiers bâti leur stratégie de campagne sur l'appel à l'une de ces fractions de l'électorat.</p>""")
+        await pause(3.8)
+        await carte("""<div class="filet-carte"></div>
+          <p class="grand">Découvrez les effets possibles de la mobilisation de chaque génération.</p>""")
+        await pause(2.4)
         await carte("")
-        await pause(0.5)
 
-        # 2. Point de départ : le sondage
-        await defiler("#sim-label")
-        await legende("Point de départ : le sondage Odoxa-Backbone d'octobre 2026, 12 005 personnes")
-        await pause(3.0)
-
-        # 3. Scénarios prêts à l'emploi
-        await legende("1. Choisissez un scénario")
-        await defiler("#scenarios")
-        await cliquer('[data-scenario="jeunes-participent"]')
-        await legende("Moins d'abstention : les moins de 35 ans votent autant que les 65-74 ans…")
+        # 2. Présidentielle 2022 : les scénarios d'abstention
+        await legende("Rejouez la présidentielle 2022")
+        await defiler(".scrutins", 170)
+        await cliquer('.scrutins [data-sim-election="2022"]')
         await pause(0.6)
-        await defiler("#sim-liste")
-        await legende("Mélenchon creuse l'écart sur Philippe pour la qualification")
-        await pause(3.2)
+        await scenario('[data-scenario="sans-aines"]',
+                       "Scénario : et si les 70 ans et plus étaient restés chez eux ?",
+                       "Emmanuel Macron éliminé : Marine Le Pen face à Jean-Luc Mélenchon")
+        await scenario('[data-scenario="aines-comme-jeunes"]',
+                       "Scénario : et si les 60 ans et plus votaient comme les 25-34 ans ?",
+                       "Jean-Luc Mélenchon arrive en tête du premier tour")
 
-        await legende("1. Choisissez un scénario")
-        await defiler("#scenarios")
-        await cliquer('[data-scenario="jeunes-choisissent-aines"]')
-        await legende("Les moins de 35 ans votent comme les 75 ans et plus…")
-        await pause(0.6)
-        await defiler("#sim-titre")
-        await legende("… et Philippe prend la place de Mélenchon au second tour")
-        await pause(3.4)
-
-        # 4. Réglage à la main d'une tranche d'âge
-        await legende("2. Ou réglez l'abstention de chaque âge")
+        # 3. Présidentielle 2027 : le sondage d'octobre
+        await legende("Et pour 2027 ? Le sondage Odoxa-Backbone, 12 005 personnes")
+        await defiler(".scrutins", 170)
+        await cliquer('.scrutins [data-sim-election="2027"]')
+        await pause(0.3)
         await cliquer('[data-scenario="reel"]')
-        await defiler("#sim-ages")
-        x, y = await viser("#sim-p-0")
-        for valeur in range(68, 101, 2):
-            await page.evaluate("v => { const i = document.getElementById('sim-p-0'); i.value = v; i.dispatchEvent(new Event('input', { bubbles: true })); }", valeur)
-            await page.evaluate("v => { const c = document.getElementById('video-curseur'); const r = document.getElementById('sim-p-0').getBoundingClientRect(); c.style.left = (r.left + 7 + (r.width - 14) * v / 100) + 'px'; }", valeur)
-            await pause(0.07)
-        await legende("Plus aucune abstention chez les 18-24 ans")
-        await pause(1.4)
-        await defiler("#sim-liste")
+        await pause(0.4)
+        await defiler("#sim-label", 150)
+        await legende("Mélenchon devance Philippe d'un seul point pour le second tour")
+        await pause(3.0)
+        await scenario('[data-scenario="jeunes-choisissent-aines"]',
+                       "Scénario : et si les moins de 35 ans votaient comme les 75 ans et plus ?",
+                       "Édouard Philippe passe au second tour à la place de Mélenchon")
+
+        # 4. Les réglages à la main : la barre du bas suit chaque geste
+        await legende("À vous de régler chaque génération : le résultat suit en direct, en bas de l'écran")
+        await defiler("#scenarios")
+        await cliquer('[data-scenario="reel"]')
+        await defiler("#sim-ages", 175)
+        await pause(1.2)
+        await glisser(0, 68, 100)
+        await glisser(1, 69, 100)
+        await legende("Tous les jeunes votent : Mélenchon monte à 20 %")
         await pause(2.6)
-
-        # 5. Courbes du vote par âge
-        await legende("3. Comparez les électorats par âge")
-        await defiler("#courbes-cles")
-        await cliquer('[data-cle="melenchon"]')
-        await legende("Mélenchon : 44 % chez les 18-24 ans, 7 % chez les 75 ans et plus")
-        await pause(3.0)
-        await cliquer('[data-cle="philippe"]')
-        await legende("Philippe : l'inverse, de 14 % à 28 %")
+        await legende("Et s'ils votaient comme leurs grands-parents ?")
+        await choisir(0, 5)
+        await pause(0.8)
+        await choisir(1, 5)
+        await pause(0.6)
+        await legende("Philippe repasse devant Mélenchon")
         await pause(3.0)
 
-        # 6. Carte de fin
+        # 5. Carte de fin
         await legende("")
         await carte("""<div class="filet-carte"></div>
           <h1>À vous de jouer</h1>
-          <p>Faites voter ou s'abstenir chaque génération, et voyez qui se qualifierait au second tour.</p>
+          <p class="grand">Faites voter ou s'abstenir chaque génération, en 2022, en 2024 et pour 2027, et voyez qui passerait au second tour.</p>
+          <p>Lien en commentaire.</p>
           <p class="petit">Sources : Odoxa-Backbone, intentions de vote pour 2027 (octobre 2026) ; Ipsos, Sociologie des électorats 2022 et 2024 ; INSEE ; ministère de l'Intérieur. Simulation à titre indicatif.</p>""")
-        await pause(3.5)
+        await pause(4.0)
 
         # Image de couverture, prise sur la carte de titre
         await carte("""<div class="filet-carte"></div>
-          <h1>Jeunesse, vieillesse, abstention&nbsp;: comment l'abstention différenciée des générations pèse-t-elle sur les élections&nbsp;?</h1>
-          <p>Une jeunesse réputée progressiste, une vieillesse présentée comme conservatrice : mesurez ce que change la mobilisation de chaque génération, en 2022, en 2024 et pour 2027.</p>""")
+          <h1>Jeunesse, vieillesse, abstention&nbsp;: comment l'abstention différenciée pèse-t-elle sur le résultat des élections passées et à venir&nbsp;?</h1>
+          <p class="grand">Découvrez les effets possibles de la mobilisation de chaque génération.</p>""")
         await pause(0.6)
         await page.screenshot(path=str(SORTIE / "couverture_linkedin.png"))
 
