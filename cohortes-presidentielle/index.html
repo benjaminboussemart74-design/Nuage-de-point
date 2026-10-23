@@ -722,6 +722,7 @@ function tranchesReelles(election) {
 // pour chaque tranche. Le groupe indique ce que le scénario modifie.
 const GROUPES_SCENARIOS = {
   reference: 'Point de départ',
+  extremes: 'Scénarios extrêmes · jusqu’où va l’écart entre générations ?',
   participation: 'Participation seule · les choix de candidats restent réels',
   choix: 'Choix des candidats seul · la participation reste réelle',
   les_deux: 'Participation et choix de candidats',
@@ -731,6 +732,16 @@ const aines = t => t[4].nom.split('-')[0] + ' ans et plus';
 const nomScenario = s => typeof s.nom === 'function' ? s.nom(tranchesReelles(sim.election)) : s.nom;
 const SCENARIOS = [
   { id: 'reel', groupe: 'reference', nom: 'Résultat officiel', appliquer: t => ({ p: t.map(x => x.participation), c: t.map((_, j) => j) }) },
+  { id: 'seuls-jeunes', groupe: 'extremes', nom: 'Seuls les moins de 35 ans votent',
+    appliquer: t => ({ p: t.map((x, j) => j < 2 ? x.participation : 0), c: t.map((_, j) => j) }) },
+  { id: 'seuls-18-24', groupe: 'extremes', nom: t => 'Seuls les ' + t[0].nom + ' votent',
+    appliquer: t => ({ p: t.map((x, j) => j === 0 ? x.participation : 0), c: t.map((_, j) => j) }) },
+  { id: 'seuls-aines', groupe: 'extremes', nom: t => 'Seuls les ' + aines(t) + ' votent',
+    appliquer: t => ({ p: t.map((x, j) => j >= 4 ? x.participation : 0), c: t.map((_, j) => j) }) },
+  { id: 'seuls-doyens', groupe: 'extremes', nom: t => 'Seuls les ' + t[5].nom + ' votent',
+    appliquer: t => ({ p: t.map((x, j) => j === 5 ? x.participation : 0), c: t.map((_, j) => j) }) },
+  { id: 'jeunesse-mobilisee', groupe: 'extremes', nom: 'Tous les jeunes votent, la moitié des aînés reste chez elle',
+    appliquer: t => ({ p: t.map((x, j) => j < 2 ? 1 : j >= 4 ? x.participation / 2 : x.participation), c: t.map((_, j) => j) }) },
   { id: 'tous', groupe: 'participation', nom: 'Tous les inscrits votent', appliquer: t => ({ p: t.map(() => 1), c: t.map((_, j) => j) }) },
   { id: 'jeunes-participent', groupe: 'participation', nom: t => 'Les moins de 35 ans se mobilisent autant que les ' + t[4].nom,
     appliquer: t => ({ p: t.map((x, j) => j < 2 ? t[4].participation : x.participation), c: t.map((_, j) => j) }) },
@@ -809,9 +820,14 @@ function rendreSimu() {
       'Choisissez un scénario ci-dessus, ou réglez chaque tranche d’âge, pour le transformer.';
   } else if (presidentielle) {
     const memes = [a.id, b.id].sort().join() === [ordreReel[0].id, ordreReel[1].id].sort().join();
-    titre = scrutin.futur
-      ? (memes ? 'Le second tour opposerait toujours ' : 'Le second tour opposerait ') + a.nom + ' à ' + b.nom
-      : (memes ? 'Le second tour aurait toujours opposé ' : 'Le second tour aurait opposé ') + a.nom + ' à ' + b.nom;
+    const premierChange = a.id !== ordreReel[0].id;
+    if (memes && premierChange) {
+      titre = a.nom + (scrutin.futur ? ' arriverait' : ' serait arrivé') + ' en tête, devant ' + b.nom + ' (' + pct(a.score) + ' contre ' + pct(b.score) + ')';
+    } else {
+      titre = scrutin.futur
+        ? (memes ? 'Le second tour opposerait toujours ' : 'Le second tour opposerait ') + a.nom + ' à ' + b.nom
+        : (memes ? 'Le second tour aurait toujours opposé ' : 'Le second tour aurait opposé ') + a.nom + ' à ' + b.nom;
+    }
     chapo = c.nom + ' serait troisième, à ' + ecartPts(b.score - c.score) + ' de la qualification, contre ' +
       ecartPts(officiel[ordreReel[1].id] - officiel[ordreReel[2].id]) + (scrutin.futur ? ' dans le sondage.' : ' en réalité.');
   } else {
