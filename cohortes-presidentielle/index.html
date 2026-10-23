@@ -186,9 +186,15 @@ h3 { font-weight: 700; font-size: 1.15rem; line-height: 1.2; }
 .bulle-courbes .pied { border-top: 1px solid var(--border); margin-top: 5px; padding-top: 5px; color: var(--text-secondary); }
 
 /* Simulateur */
-.simulateur { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); border-bottom: 1px solid var(--border); }
+.simulateur { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); align-items: start; border-bottom: 1px solid var(--border); }
 .resultats { padding: 28px 40px 32px 0; display: flex; flex-direction: column; gap: 22px; min-width: 0; }
 .reglages { padding: 28px 0 32px 32px; border-left: 1px solid var(--border); display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+@media (min-width: 961px) {
+  /* Les réglages restent visibles à côté des résultats pendant tout le défilement du simulateur */
+  .reglages { position: sticky; top: calc(56px + env(safe-area-inset-top, 0px)); max-height: calc(100vh - 64px - env(safe-area-inset-top, 0px));
+    overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; padding-top: 20px; padding-bottom: 20px; gap: 10px; }
+  .reglages .age { padding: 7px 0; }
+}
 .verdict { display: flex; flex-direction: column; gap: 8px; }
 .verdict p { margin: 0; font-size: 14px; color: var(--text-secondary); max-width: 60ch; }
 
@@ -352,15 +358,23 @@ input[type="range"]::-moz-range-progress { height: 3px; background: var(--accent
     transform: translateY(105%); transition: transform 0.2s ease-out;
   }
   .barre-resultat.visible { transform: none; }
-  .barre-resultat .qui-passe { display: flex; gap: 12px; min-width: 0; overflow: hidden; }
-  .barre-resultat .candidat { display: grid; grid-template-columns: 30px auto; gap: 7px; align-items: center; min-width: 0; }
-  .barre-resultat .candidat .portrait { width: 30px; height: 30px; }
-  .barre-resultat .candidat i { width: 30px; height: 30px; background: var(--couleur); display: block; }
-  .barre-resultat .candidat span { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
-  .barre-resultat .candidat small { font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .barre-resultat .candidat b { font-family: var(--font-mono); font-size: 15px; font-weight: 700; border-bottom: 2px solid var(--couleur); }
-  .barre-resultat .voir { font-size: 12px; font-weight: 600; color: var(--accent); background: none; border: 1px solid var(--border-mid); border-radius: 2px; padding: 7px 10px; cursor: pointer; white-space: nowrap; }
+  .barre-resultat { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .barre-resultat .titre-direct { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 11.5px; font-weight: 600; color: var(--text-secondary); }
+  .barre-resultat .titre-direct span { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .barre-resultat .rangee { display: grid; grid-template-columns: 22px 84px minmax(0, 1fr) 48px 54px; gap: 8px; align-items: center; height: 26px; }
+  .barre-resultat .rangee .portrait, .barre-resultat .rangee i { width: 22px; height: 22px; display: block; background: var(--couleur); }
+  .barre-resultat .rangee .nom-court { font-size: 12.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .barre-resultat .rangee .jauge { position: relative; height: 6px; background: var(--bg-sidebar); }
+  .barre-resultat .rangee .jauge b { position: absolute; inset: 0 auto 0 0; background: var(--couleur); transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1); }
+  .barre-resultat .rangee .jauge u { position: absolute; top: -3px; bottom: -3px; width: 1.5px; background: var(--text); }
+  .barre-resultat .rangee .sc { font-family: var(--font-mono); font-size: 13px; font-weight: 700; text-align: right; }
+  .barre-resultat .rangee .ec { font-family: var(--font-mono); font-size: 11px; text-align: right; color: var(--text-muted); }
+  .barre-resultat .rangee .ec.hausse { color: var(--green-leg); }
+  .barre-resultat .rangee .ec.baisse { color: var(--red); }
+  .barre-resultat .rangee.qualifie .nom-court { text-decoration: underline; text-decoration-color: var(--couleur); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+  .barre-resultat .voir { font-size: 12px; font-weight: 600; color: var(--accent); background: none; border: 0; padding: 4px 0; cursor: pointer; white-space: nowrap; text-decoration: underline; text-underline-offset: 3px; }
   #simulateur { padding-bottom: 8px; }
+  .reglages { padding-bottom: 170px; }
 }
 
 /* Écrans tactiles : cibles plus grandes */
@@ -853,11 +867,19 @@ function rendreSimu() {
   t.forEach((_, j) => document.getElementById('sim-p-' + j).style.setProperty('--remplissage', Math.round(sim.participation[j] * 100) + '%'));
 
   // Barre de résultat fixée en bas de l'écran
+  // Petit tableau en direct (téléphone) : les quatre premiers, les qualifiés soulignés, trait = point de départ
+  const nbQualifies = presidentielle ? 2 : 1;
   document.getElementById('barre-resultat').innerHTML =
-    '<div class="qui-passe">' + tete.map(x =>
-      '<div class="candidat" style="--couleur:var(--c-' + COULEURS[x.id] + ')">' + (portrait(x.id) || '<i></i>') +
-        '<span><small>' + x.nom.split(' ').slice(1).join(' ') + '</small><b>' + pct(x.score) + '</b></span></div>').join('') +
-    '</div><button type="button" class="voir" id="voir-resultat">Détail</button>';
+    '<div class="titre-direct"><span>Résultat en direct · ' + (scenario ? (scenario.id === 'reel' ? scrutin.reference : nomScenario(scenario)) : 'vos réglages') + '</span>' +
+      '<button type="button" class="voir" id="voir-resultat">Détail</button></div>' +
+    ordre.slice(0, 4).map((x, i) => {
+      const ecart = x.score - officiel[x.id];
+      return '<div class="rangee' + (i < nbQualifies ? ' qualifie' : '') + '" style="--couleur:var(--c-' + COULEURS[x.id] + ')">' + (portrait(x.id) || '<i></i>') +
+        '<span class="nom-court">' + (x.nom.split(' ').slice(1).join(' ') || x.nom) + '</span>' +
+        '<span class="jauge"><b style="width:' + Math.min(100, x.score / ECHELLE_MAX * 100) + '%"></b><u style="left:' + Math.min(100, officiel[x.id] / ECHELLE_MAX * 100) + '%"></u></span>' +
+        '<span class="sc">' + pct(x.score) + '</span>' +
+        '<span class="ec' + (Math.abs(ecart) < 0.0005 ? '' : ecart > 0 ? ' hausse' : ' baisse') + '">' + pts(ecart) + '</span></div>';
+    }).join('');
   document.getElementById('voir-resultat').addEventListener('click', () => document.getElementById('sim-tete').scrollIntoView({ block: 'start' }));
   document.getElementById('sim-total-reel').textContent = '· réelle ' + pct(reel.total / inscrits);
   document.querySelectorAll('[data-scenario]').forEach(btn => btn.setAttribute('aria-pressed', btn.dataset.scenario === sim.scenario));
@@ -1208,14 +1230,12 @@ document.querySelectorAll('[data-sim-election]').forEach(btn => btn.addEventList
 document.getElementById('sim-reinit').addEventListener('click', () => { appliquerScenario('reel'); rendreSimu(); });
 document.querySelectorAll('[data-election]').forEach(btn => btn.addEventListener('click', () => { poids.election = btn.dataset.election; rendrePoids(); }));
 
-// La barre de résultat apparaît quand on est dans le simulateur mais que le podium est hors de l'écran.
-const visibilite = { simulateur: false, tete: true };
+// Sur téléphone, le tableau en direct apparaît dès que les réglages par âge sont à l'écran,
+// pour voir le résultat changer pendant qu'on règle.
 const observateur = new IntersectionObserver(entrees => {
-  entrees.forEach(e => { visibilite[e.target.id === 'simulateur' ? 'simulateur' : 'tete'] = e.isIntersecting; });
-  document.getElementById('barre-resultat').classList.toggle('visible', visibilite.simulateur && !visibilite.tete);
-}, { threshold: 0 });
-observateur.observe(document.getElementById('simulateur'));
-observateur.observe(document.getElementById('sim-tete'));
+  entrees.forEach(e => document.getElementById('barre-resultat').classList.toggle('visible', e.isIntersecting));
+}, { threshold: 0, rootMargin: '0px 0px -40% 0px' });
+observateur.observe(document.querySelector('.reglages'));
 
 let attenteRedimension;
 window.addEventListener('resize', () => {

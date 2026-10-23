@@ -9,12 +9,14 @@ avec son horodatage, puis ffmpeg assemble ces images en MP4 lisible par LinkedIn
 Utilisation :
     python scripts/video_linkedin.py
 Sortie : videos/simulateur_linkedin.mp4 et videos/couverture_linkedin.png
+Avec l'option --court : videos/simulateur_linkedin_30s.mp4, une version de 30 secondes environ.
 """
 
 import asyncio
 import base64
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 
 from playwright.async_api import async_playwright
@@ -26,6 +28,10 @@ CHROMIUM = "/opt/pw-browsers/chromium"
 
 # Format vertical 4:5 : la page est affichée en 540 × 675 points, rendue deux fois plus fine.
 LARGEUR, HAUTEUR, ECHELLE = 540, 675, 2
+
+# Version courte : même parcours resserré, attentes raccourcies.
+COURT = "--court" in sys.argv
+RYTHME = 0.6 if COURT else 1.0
 
 # Habillage de la vidéo : légende en haut de l'écran, curseur visible, cartes de titre.
 HABILLAGE_CSS = """
@@ -89,6 +95,10 @@ async def main():
         async def pause(secondes):
             await page.wait_for_timeout(int(secondes * 1000))
 
+        async def temps(secondes):
+            # Attente de mise en scène, raccourcie dans la version courte
+            await pause(secondes * RYTHME)
+
         async def legende(texte):
             await page.evaluate("t => { const l = document.getElementById('video-legende'); l.textContent = t; l.hidden = !t; }", texte)
 
@@ -100,13 +110,13 @@ async def main():
               const e = document.querySelector(s);
               window.scrollTo({ top: e.getBoundingClientRect().top + window.scrollY - m, behavior: 'smooth' });
             }""", [selecteur, marge])
-            await pause(1.0)
+            await temps(1.0)
 
         async def viser(selecteur):
             boite = await page.locator(selecteur).first.bounding_box()
             x, y = boite["x"] + boite["width"] / 2, boite["y"] + boite["height"] / 2
             await page.evaluate("([x, y]) => { const c = document.getElementById('video-curseur'); c.style.left = x + 'px'; c.style.top = y + 'px'; }", [x, y])
-            await pause(0.7)
+            await temps(0.7)
             return x, y
 
         async def cliquer(selecteur):
@@ -149,80 +159,126 @@ async def main():
             await legende(reponse)
             await pause(3.0)
 
-        # 1. Vos mots, en cartes de texte
-        await carte("""<div class="filet-carte"></div>
-          <h1>Jeunesse, vieillesse, abstention&nbsp;: comment l'abstention différenciée pèse-t-elle sur le résultat des élections passées et à venir&nbsp;?</h1>""")
-        await pause(4.0)
-        await carte("""<div class="filet-carte"></div>
-          <p class="grand">La fracture entre une jeunesse réputée progressiste et une vieillesse présentée comme conservatrice est un lieu commun de la science politique.</p>""")
-        await pause(3.8)
-        await carte("""<div class="filet-carte"></div>
-          <p class="grand">À gauche comme à droite, les candidats ont volontiers bâti leur stratégie de campagne sur l'appel à l'une de ces fractions de l'électorat.</p>""")
-        await pause(3.8)
-        await carte("""<div class="filet-carte"></div>
+        if COURT:
+            # Version de 30 secondes : un titre, un scénario par présidentielle, les réglages en direct, la fin.
+            await carte("""<div class="filet-carte"></div>
+          <h1>Jeunesse, vieillesse, abstention&nbsp;: comment l'abstention différenciée pèse-t-elle sur le résultat des élections&nbsp;?</h1>
           <p class="grand">Découvrez les effets possibles de la mobilisation de chaque génération.</p>""")
-        await pause(2.4)
-        await carte("")
-
-        # 2. Présidentielle 2022 : les scénarios d'abstention
-        await legende("Rejouez la présidentielle 2022")
-        await defiler(".scrutins", 170)
-        await cliquer('.scrutins [data-sim-election="2022"]')
-        await pause(0.6)
-        await scenario('[data-scenario="sans-aines"]',
-                       "Scénario : et si les 70 ans et plus étaient restés chez eux ?",
-                       "Emmanuel Macron éliminé : Marine Le Pen face à Jean-Luc Mélenchon")
-        await scenario('[data-scenario="aines-comme-jeunes"]',
-                       "Scénario : et si les 60 ans et plus votaient comme les 25-34 ans ?",
-                       "Jean-Luc Mélenchon arrive en tête du premier tour")
-
-        # 3. Présidentielle 2027 : le sondage d'octobre
-        await legende("Et pour 2027 ? Le sondage Odoxa-Backbone, 12 005 personnes")
-        await defiler(".scrutins", 170)
-        await cliquer('.scrutins [data-sim-election="2027"]')
-        await pause(0.3)
-        await cliquer('[data-scenario="reel"]')
-        await pause(0.4)
-        await defiler("#sim-label", 150)
-        await legende("Mélenchon devance Philippe d'un seul point pour le second tour")
-        await pause(3.0)
-        await scenario('[data-scenario="jeunes-choisissent-aines"]',
-                       "Scénario : et si les moins de 35 ans votaient comme les 75 ans et plus ?",
-                       "Édouard Philippe passe au second tour à la place de Mélenchon")
-
-        # 4. Les réglages à la main : la barre du bas suit chaque geste
-        await legende("À vous de régler chaque génération : le résultat suit en direct, en bas de l'écran")
-        await defiler("#scenarios")
-        await cliquer('[data-scenario="reel"]')
-        await defiler("#sim-ages", 175)
-        await pause(1.2)
-        await glisser(0, 68, 100)
-        await glisser(1, 69, 100)
-        await legende("Tous les jeunes votent : Mélenchon monte à 20 %")
-        await pause(2.6)
-        await legende("Et s'ils votaient comme leurs grands-parents ?")
-        await choisir(0, 5)
-        await pause(0.8)
-        await choisir(1, 5)
-        await pause(0.6)
-        await legende("Philippe repasse devant Mélenchon")
-        await pause(3.0)
-
-        # 5. Carte de fin
-        await legende("")
-        await carte("""<div class="filet-carte"></div>
+            await pause(3.6)
+            await carte("")
+            await legende("2022 : et si les 70 ans et plus étaient restés chez eux ?")
+            await defiler(".scrutins", 170)
+            await cliquer('.scrutins [data-sim-election="2022"]')
+            await defiler("#scenarios")
+            await cliquer('[data-scenario="sans-aines"]')
+            await defiler("#sim-label", 150)
+            await legende("Macron éliminé : Le Pen face à Mélenchon")
+            await pause(2.6)
+            await legende("2027 : et si les moins de 35 ans votaient comme les 75 ans et plus ?")
+            await defiler(".scrutins", 170)
+            await cliquer('.scrutins [data-sim-election="2027"]')
+            await defiler("#scenarios")
+            await cliquer('[data-scenario="jeunes-choisissent-aines"]')
+            await defiler("#sim-label", 150)
+            await legende("Philippe passe au second tour à la place de Mélenchon")
+            await pause(2.6)
+            await legende("À vous de régler chaque génération : le résultat suit en direct")
+            await defiler("#scenarios")
+            await cliquer('[data-scenario="reel"]')
+            await defiler("#sim-ages", 175)
+            await glisser(0, 68, 100, 4)
+            await glisser(1, 69, 100, 4)
+            await legende("Tous les jeunes votent : Mélenchon monte")
+            await pause(1.6)
+            await legende("Et s'ils votaient comme leurs grands-parents ?")
+            await choisir(0, 5)
+            await choisir(1, 5)
+            await legende("Philippe repasse devant Mélenchon")
+            await pause(2.2)
+            await legende("")
+            await carte("""<div class="filet-carte"></div>
           <h1>À vous de jouer</h1>
-          <p class="grand">Faites voter ou s'abstenir chaque génération, en 2022, en 2024 et pour 2027, et voyez qui passerait au second tour.</p>
+          <p class="grand">Faites voter ou s'abstenir chaque génération, et voyez qui passerait au second tour.</p>
           <p>Lien en commentaire.</p>
-          <p class="petit">Sources : Odoxa-Backbone, intentions de vote pour 2027 (octobre 2026) ; Ipsos, Sociologie des électorats 2022 et 2024 ; INSEE ; ministère de l'Intérieur. Simulation à titre indicatif.</p>""")
-        await pause(4.0)
+          <p class="petit">Sources : Odoxa-Backbone (octobre 2026) ; Ipsos, Sociologie des électorats 2022 ; INSEE ; ministère de l'Intérieur. Simulation à titre indicatif.</p>""")
+            await pause(3.2)
+
+        else:
+            # 1. Vos mots, en cartes de texte
+            await carte("""<div class="filet-carte"></div>
+              <h1>Jeunesse, vieillesse, abstention&nbsp;: comment l'abstention différenciée pèse-t-elle sur le résultat des élections passées et à venir&nbsp;?</h1>""")
+            await pause(4.0)
+            await carte("""<div class="filet-carte"></div>
+              <p class="grand">La fracture entre une jeunesse réputée progressiste et une vieillesse présentée comme conservatrice est un lieu commun de la science politique.</p>""")
+            await pause(3.8)
+            await carte("""<div class="filet-carte"></div>
+              <p class="grand">À gauche comme à droite, les candidats ont volontiers bâti leur stratégie de campagne sur l'appel à l'une de ces fractions de l'électorat.</p>""")
+            await pause(3.8)
+            await carte("""<div class="filet-carte"></div>
+              <p class="grand">Découvrez les effets possibles de la mobilisation de chaque génération.</p>""")
+            await pause(2.4)
+            await carte("")
+
+            # 2. Présidentielle 2022 : les scénarios d'abstention
+            await legende("Rejouez la présidentielle 2022")
+            await defiler(".scrutins", 170)
+            await cliquer('.scrutins [data-sim-election="2022"]')
+            await pause(0.6)
+            await scenario('[data-scenario="sans-aines"]',
+                           "Scénario : et si les 70 ans et plus étaient restés chez eux ?",
+                           "Emmanuel Macron éliminé : Marine Le Pen face à Jean-Luc Mélenchon")
+            await scenario('[data-scenario="aines-comme-jeunes"]',
+                           "Scénario : et si les 60 ans et plus votaient comme les 25-34 ans ?",
+                           "Jean-Luc Mélenchon arrive en tête du premier tour")
+
+            # 3. Présidentielle 2027 : le sondage d'octobre
+            await legende("Et pour 2027 ? Le sondage Odoxa-Backbone, 12 005 personnes")
+            await defiler(".scrutins", 170)
+            await cliquer('.scrutins [data-sim-election="2027"]')
+            await pause(0.3)
+            await cliquer('[data-scenario="reel"]')
+            await pause(0.4)
+            await defiler("#sim-label", 150)
+            await legende("Mélenchon devance Philippe d'un seul point pour le second tour")
+            await pause(3.0)
+            await scenario('[data-scenario="jeunes-choisissent-aines"]',
+                           "Scénario : et si les moins de 35 ans votaient comme les 75 ans et plus ?",
+                           "Édouard Philippe passe au second tour à la place de Mélenchon")
+
+            # 4. Les réglages à la main : la barre du bas suit chaque geste
+            await legende("À vous de régler chaque génération : le résultat suit en direct, en bas de l'écran")
+            await defiler("#scenarios")
+            await cliquer('[data-scenario="reel"]')
+            await defiler("#sim-ages", 175)
+            await pause(1.2)
+            await glisser(0, 68, 100)
+            await glisser(1, 69, 100)
+            await legende("Tous les jeunes votent : Mélenchon monte à 20 %")
+            await pause(2.6)
+            await legende("Et s'ils votaient comme leurs grands-parents ?")
+            await choisir(0, 5)
+            await pause(0.8)
+            await choisir(1, 5)
+            await pause(0.6)
+            await legende("Philippe repasse devant Mélenchon")
+            await pause(3.0)
+
+            # 5. Carte de fin
+            await legende("")
+            await carte("""<div class="filet-carte"></div>
+              <h1>À vous de jouer</h1>
+              <p class="grand">Faites voter ou s'abstenir chaque génération, en 2022, en 2024 et pour 2027, et voyez qui passerait au second tour.</p>
+              <p>Lien en commentaire.</p>
+              <p class="petit">Sources : Odoxa-Backbone, intentions de vote pour 2027 (octobre 2026) ; Ipsos, Sociologie des électorats 2022 et 2024 ; INSEE ; ministère de l'Intérieur. Simulation à titre indicatif.</p>""")
+            await pause(4.0)
 
         # Image de couverture, prise sur la carte de titre
         await carte("""<div class="filet-carte"></div>
           <h1>Jeunesse, vieillesse, abstention&nbsp;: comment l'abstention différenciée pèse-t-elle sur le résultat des élections passées et à venir&nbsp;?</h1>
           <p class="grand">Découvrez les effets possibles de la mobilisation de chaque génération.</p>""")
         await pause(0.6)
-        await page.screenshot(path=str(SORTIE / "couverture_linkedin.png"))
+        if not COURT:
+            await page.screenshot(path=str(SORTIE / "couverture_linkedin.png"))
 
         await cdp.send("Page.stopScreencast")
         await pause(0.3)
@@ -238,7 +294,7 @@ async def main():
     liste.write_text("\n".join(lignes), encoding="utf-8")
 
     # Conversion en MP4 (H.264, 30 images par seconde), le format recommandé par LinkedIn
-    mp4 = SORTIE / "simulateur_linkedin.mp4"
+    mp4 = SORTIE / ("simulateur_linkedin_30s.mp4" if COURT else "simulateur_linkedin.mp4")
     subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i", str(liste),
                     "-vf", f"fps=30,scale={LARGEUR * ECHELLE}:{HAUTEUR * ECHELLE}:flags=lanczos,format=yuv420p",
                     "-c:v", "libx264", "-preset", "slow", "-crf", "18", "-movflags", "+faststart", "-an", str(mp4)],
